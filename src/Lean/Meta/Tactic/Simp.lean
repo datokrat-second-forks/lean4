@@ -25,6 +25,14 @@ namespace Lean
 
 builtin_initialize registerTraceClass `Meta.Tactic.simp
 builtin_initialize registerTraceClass `Meta.Tactic.simp.congr (inherited := true)
+builtin_initialize registerTraceClass `Meta.Tactic.simp.congrView
+builtin_initialize registerTraceClass `Debug.Meta.Tactic.simp.congrView
+builtin_initialize registerTraceClass `Debug.Meta.Tactic.simp.dsimpCost
+builtin_initialize registerTraceClass `Debug.Meta.Tactic.simp.instanceCheckCost
+builtin_initialize registerTraceClass `Debug.Meta.Tactic.simp.congrViewCost
+builtin_initialize registerTraceClass `Debug.Meta.Tactic.simp.rewriteCost
+builtin_initialize registerTraceClass `Debug.Meta.Tactic.simp.congrCost
+builtin_initialize registerTraceClass `Debug.Meta.Tactic.simp.congrView.isDefEq
 builtin_initialize registerTraceClass `Meta.Tactic.simp.discharge (inherited := true)
 builtin_initialize registerTraceClass `Meta.Tactic.simp.rewrite (inherited := true)
 builtin_initialize registerTraceClass `Meta.Tactic.simp.backwardDefEq (inherited := true)

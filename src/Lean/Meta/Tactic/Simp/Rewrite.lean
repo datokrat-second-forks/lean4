@@ -231,7 +231,10 @@ where
               if isRflOld then
                 logWarning m!"theorem {thm.proof} is no longer rfl"
             continue
-        if let some result ← tryTheoremWithExtraArgs? e thm numExtraArgs then
+        let hb0 ← IO.getNumHeartbeats
+        let res? ← tryTheoremWithExtraArgs? e thm numExtraArgs
+        trace[Debug.Meta.Tactic.simp.rewriteCost] "{tag} {(← IO.getNumHeartbeats) - hb0} {res?.isSome} {← ppOrigin thm.origin}:{indentExpr e}"
+        if let some result := res? then
           trace[Debug.Meta.Tactic.simp] "rewrite result {e} => {result.expr}"
           if rflOnly && !thm.rfl && thm.backwardRfl then
             trace[Meta.Tactic.simp.backwardDefEq]

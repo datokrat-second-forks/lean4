@@ -270,6 +270,33 @@ structure State where
   usedTheorems : UsedSimps := {}
   numSteps     : Nat := 0
   diag         : Diagnostics := {}
+  /-- Instantiations of `@[congr_view]` theorems, see `Simp.congrView?`. -/
+  congrViewCache : Std.HashMap (Name × Expr × Array Expr) (Expr × Array (Option Expr)) := {}
+  /--
+  Whether the instance arguments of the result of the last congruence theorem application have their
+  expected types by construction (see `Simp.trySimpCongrTheorem?`).
+  -/
+  congrResultConsistent : Bool := false
+  /-- Cache for `Simp.packCongrConsistent`. -/
+  packCongrConsistent : Std.HashMap Name Bool := {}
+  /--
+  For each function, the pack congruence theorems (`congr` if the flag is `false`, `dsimp_congr`
+  otherwise) indexed by their left-hand sides, and their names. See `Simp.getPackCongrIndex`.
+  -/
+  packCongrIndex : Std.HashMap (Name × Bool) (DiscrTree Name × NameSet) := {}
+  /--
+  Whether `simp` is simplifying a pack value. Congruence theorems for terms that are applications of
+  a pack constructor only apply then (see `Simp.inPackValueOnly`).
+  -/
+  inPackValue : Bool := false
+  /-- Whether both sides of a `simp` theorem are applications of a pack constructor, by origin key. -/
+  packCtorThms : Std.HashMap Name Bool := {}
+  /-- Results of `simpPackValue`. -/
+  packValueCache : Std.HashMap Expr Result := {}
+  /-- Results of `dsimpPackValue`. -/
+  packValueDCache : Std.HashMap Expr Expr := {}
+  /-- Pairs of a pack congruence theorem and a term whose left-hand side does not match it. -/
+  packCongrFailures : Std.HashSet (Name × Expr) := {}
 
 structure Stats where
   usedTheorems : UsedSimps := {}
@@ -324,9 +351,23 @@ set_option compiler.ignoreBorrowAnnotation true in
 @[extern "lean_dsimp"]
 opaque dsimp (e : Expr) : SimpM Expr
 
+set_option compiler.ignoreBorrowAnnotation true in
+/--
+Simplifies a pack value, an application of a pack constructor, by pack congruence theorems,
+by rewriting the explicit fields that no other field depends on, and by `simp` theorems whose sides are
+both applications of a pack constructor.
+-/
+@[extern "lean_simp_pack_value"]
+opaque simpPackValue (e : Expr) : SimpM Result
+
+set_option compiler.ignoreBorrowAnnotation true in
+/-- The definitional counterpart of `simpPackValue`. -/
+@[extern "lean_dsimp_pack_value"]
+opaque dsimpPackValue (e : Expr) : SimpM Expr
+
 @[inline] def modifyDiag (f : Diagnostics → Diagnostics) : SimpM Unit := do
   if (← isDiagnosticsEnabled) then
-    modify fun { cache, congrCache, dsimpCache, usedTheorems, numSteps, diag } => { cache, congrCache, dsimpCache, usedTheorems, numSteps, diag := f diag }
+    modify fun s => { s with diag := f s.diag }
 
 /--
 Result type for a simplification procedure. We have `pre` and `post` simplification procedures.

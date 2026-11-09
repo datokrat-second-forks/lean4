@@ -8,6 +8,7 @@ prelude
 public import Lean.Meta.Tactic.Replace
 public import Lean.Meta.Tactic.Simp.Rewrite
 public import Lean.Meta.Tactic.Simp.Diagnostics
+public import Lean.Meta.Tactic.Simp.CongrView
 public import Lean.Meta.Match.Value
 public import Lean.Meta.MonadSimp
 public import Lean.Util.CollectLooseBVars
@@ -24,6 +25,107 @@ register_builtin_option backward.dsimp.proofs : Bool := {
     descr    := "Let `dsimp` simplify proof terms"
   }
 
+
+register_builtin_option simp.congrView.markResult : Bool := {
+    defValue := true
+    descr    := "(simp) record the result of congruence through a `@[congr_view]` view as simplified, \
+      so that `simp` does not visit it again unless a post-lemma rewrites it"
+  }
+
+register_builtin_option simp.congrView.unifyInstances : Bool := {
+    defValue := true
+    descr    := "(simp) when matching a `@[congr_view]` view, take its instance parameters from the \
+      matched term by unification instead of synthesizing them, and synthesize only those that \
+      unification leaves unassigned"
+  }
+
+register_builtin_option simp.congrView.enabled : Bool := {
+    defValue := true
+    descr    := "(simp) DEBUG: use `@[congr_view]` views; when false, terms that a view matches are \
+      only traced"
+  }
+
+register_builtin_option simp.congrView.skipInstanceCheck : Bool := {
+    defValue := true
+    descr    := "(simp) do not check the instance arguments of the result of congruence through a \
+      `@[congr_view]` view against `backward.dsimp.instanceTypes`; the view rebuilds them from its \
+      bundled arguments, so their types match"
+  }
+
+register_builtin_option simp.packCongr.strictMatch : Bool := {
+    defValue := false
+    descr    := "(simp) apply a pack congruence theorem only if matching its left-hand side syntactically \
+      by argument positions determines all its parameters; otherwise skip it without unification"
+  }
+
+register_builtin_option simp.packCongr.canonicalize : Bool := {
+    defValue := false
+    descr    := "(simp) when a `dsimp_congr` theorem applies without progress in its hypotheses, still \
+      rebuild the term from its right-hand side, which replaces the instance arguments of the term by \
+      the canonical ones of the theorem"
+  }
+
+register_builtin_option debug.simp.packCongr.fallback : Bool := {
+    defValue := true
+    descr    := "(simp) DEBUG: after a pack congruence theorem applies without progress, try other \
+      congruence theorems and the default congruence"
+  }
+
+register_builtin_option debug.simp.packCongr.old : Nat := {
+    defValue := 0
+    descr    := "(simp) DEBUG: bit mask restoring earlier pack congruence behavior: 1 = no index, \
+      2 = no result marking, 4 = no failure cache, 8 = `HEq` progress only with a proof"
+  }
+
+def packOld (bit : Nat) : CoreM Bool := do
+  return (debug.simp.packCongr.old.get (← getOptions)) &&& bit != 0
+
+register_builtin_option simp.packCongr.ctorOnly : Bool := {
+    defValue := true
+    descr    := "(simp) accept a rewrite of a pack value only if the result is again an application of \
+      the pack constructor (possibly after unfolding reducible definitions)"
+  }
+
+register_builtin_option debug.simp.congr.disabled : String := {
+    defValue := ""
+    descr    := "(simp) DEBUG: name of a `congr` theorem that `simp` does not use"
+  }
+
+register_builtin_option debug.simp.packCongr.eta : Bool := {
+    defValue := false
+    descr    := "(simp) DEBUG: replace a pack value `S.mk ps (S.f₁ ps s) …` by `s` before simplifying it"
+  }
+
+/-- DEBUG (`debug.simp.packCongr.eta`): `s` if `e` is `S.mk ps (S.f₁ ps s) … (S.fₙ ps s)`. -/
+def packEtaM (e : Expr) : MetaM Expr := do
+  unless debug.simp.packCongr.eta.get (← getOptions) do return e
+  let some (ci, _, args) ← packCtorApp? e | return e
+  let env ← getEnv
+  let fields := getStructureFields env ci.induct
+  let mut s? : Option Expr := none
+  for h : i in [:fields.size] do
+    let a := args[ci.numParams + i]!
+    let some projFn := getProjFnForField? env ci.induct fields[i] | return e
+    unless a.isAppOfArity projFn (ci.numParams + 1) do return e
+    let s := a.appArg!
+    if let some s₀ := s? then
+      unless s₀ == s do return e
+    s? := some s
+  return s?.getD e
+
+register_builtin_option debug.simp.packStats : Bool := {
+    defValue := false
+    descr    := "(simp) DEBUG: accumulate heartbeats of pack congruence phases in `Simp.packStatsRef`"
+  }
+
+/-- DEBUG: heartbeats of pack congruence phases, see `debug.simp.packStats`. -/
+builtin_initialize packStatsRef : IO.Ref (Std.HashMap String (Nat × Nat)) ← IO.mkRef {}
+
+def recordPackStat (key : String) (hb : Nat) : CoreM Unit := do
+  if debug.simp.packStats.get (← getOptions) then
+    packStatsRef.modify fun m => m.alter key fun
+      | some (n, h) => some (n + 1, h + hb)
+      | none => some (1, hb)
 
 register_builtin_option debug.simp.check.have : Bool := {
     defValue := false
@@ -557,15 +659,250 @@ where
     let type ← inferType args[j]!
     withNewMCtxDepth <| withExactInstancesConfig <| isDefEqGuarded type d
 
-set_option compiler.ignoreBorrowAnnotation true in
-@[export lean_dsimp]
-private partial def dsimpImpl (e : Expr) : SimpM Expr := do
+/--
+Returns the pack congruence theorems among `thms` (those with a pack or `HEq` hypothesis or an
+`HEq` conclusion) indexed by their left-hand sides, and their names. Only candidates retrieved
+from the index are tried on a term, so that terms that the left-hand side cannot match are rejected
+cheaply.
+-/
+def getPackCongrIndex (fName : Name) (dsimp : Bool) (thms : List SimpCongrTheorem) :
+    SimpM (DiscrTree Name × NameSet) := do
+  if let some r := (← get).packCongrIndex[(fName, dsimp)]? then return r
+  let mut tree := {}
+  let mut packs : NameSet := {}
+  for c in thms do
+    let keys? ← withNewMCtxDepth do
+      let (xs, _, type) ← forallMetaTelescopeReducing (← inferType (← mkConstWithFreshMVarLevels c.theoremName))
+      let isPack ← pure type.isHEq <||> c.hypothesesPos.anyM fun i => do
+        let t ← inferType xs[i]!
+        return isPackHypothesis t || t.isHEq
+      unless isPack do return none
+      let lhs := if type.isHEq then type.appFn!.appFn!.appArg! else type.appFn!.appArg!
+      return some (← withReducible <| DiscrTree.mkPath lhs)
+    if let some keys := keys? then
+      tree := tree.insertKeyValue keys c.theoremName
+      packs := packs.insert c.theoremName
+  modify fun s => { s with packCongrIndex := s.packCongrIndex.insert (fName, dsimp) (tree, packs) }
+  return (tree, packs)
+
+/-- The congruence theorems among `thms` to try on `e`: pack ones only if the index retrieves them. -/
+def congrCandidates (fName : Name) (dsimp : Bool) (thms : List SimpCongrTheorem) (e : Expr) :
+    SimpM (List SimpCongrTheorem) := do
+  let (tree, packs) ← getPackCongrIndex fName dsimp thms
+  if packs.isEmpty || (← packOld 1) then return thms
+  let found := (← withSimpIndexConfig <| tree.getMatchWithExtra e).map (·.1)
+  return thms.filter fun c => !packs.contains c.theoremName || found.contains c.theoremName
+
+/--
+Instantiates the right-hand side `rhs` of a congruence theorem and reduces the beta redexes and the
+projections of constructor applications that the instantiation creates, e.g.
+`(Bundle.of Nat).carrier` when a parameter `B'` in `B'.carrier` is instantiated with `Bundle.of Nat`.
+The values of the parameters `xs` are not visited.
+-/
+def instantiateCongrRhs (rhs : Expr) (xs : Array Expr) : MetaM Expr := do
+  let vals ← xs.mapM instantiateMVars
+  let rhs ← instantiateMVars rhs
+  Meta.transform rhs
+    (pre := fun s => return if vals.contains s then .done s else .continue)
+    (post := fun s => do
+      if s.isHeadBetaTarget then return .visit s.headBeta
+      if let some s' ← reduceProjOfCtor? s then return .visit s'
+      return .continue)
+
+/--
+Whether rewriting `e` to `e'` keeps the constructor form: if `e` is an application of the constructor
+of a pack structure, so must `e'` be (see `simp.packCongr.ctorOnly`).
+-/
+def keepsPackCtor (e e' : Expr) : MetaM Bool := do
+  if (← packCtorApp? e).isNone then return true
+  return (← packCtorApp? e').isSome
+
+/--
+Runs `x` (the simplification of a pack value) with pre- and post-methods that skip rewrites breaking
+the constructor form, e.g. `ModuleCat.of_coe : of R ↑X = X`, while other rewrites still apply.
+-/
+def withPackCtorGuard (x : SimpM α) : SimpM α := do
+  let m ← getMethods
+  let guard (proc : Simproc) : Simproc := fun e => do
+    match (← proc e) with
+    | .done r => return if (← keepsPackCtor e r.expr) then .done r else .done { expr := e }
+    | .visit r => return if (← keepsPackCtor e r.expr) then .visit r else .continue
+    | .continue (some r) => return if (← keepsPackCtor e r.expr) then .continue (some r) else .continue
+    | .continue none => return .continue
+  let dguard (proc : DSimproc) : DSimproc := fun e => do
+    match (← proc e) with
+    | .done e' => return if (← keepsPackCtor e e') then .done e' else .done e
+    | .visit e' => return if (← keepsPackCtor e e') then .visit e' else .continue
+    | .continue (some e') => return if (← keepsPackCtor e e') then .continue (some e') else .continue
+    | .continue none => return .continue
+  let m' := if simp.packCongr.ctorOnly.get (← getOptions) then
+    { m with pre := guard m.pre, post := guard m.post, dpre := dguard m.dpre, dpost := dguard m.dpost }
+    else m
+  let saved := (← get).inPackValue
+  modify fun s => { s with inPackValue := true }
+  try withReader (fun _ => m'.toMethodsRef) x
+  finally modify fun s => { s with inPackValue := saved }
+
+/--
+Whether a congruence theorem must be skipped for `e`: theorems about applications of a pack
+constructor only apply while simplifying a pack value.
+-/
+def inPackValueOnly (e : Expr) : SimpM Bool := do
+  return !(← get).inPackValue && (← packCtorApp? e).isSome
+
+/--
+Whether the theorem `c` must be skipped for `e` (see `inPackValueOnly`). Only theorems with an `Eq`
+conclusion, which rewrite a pack value as a whole (e.g. `ModuleCat.of k ↑M = ModuleCat.of k ↑M'`), are
+restricted; a theorem with an `HEq` conclusion about a structure constructor, e.g. `ContinuousMap.mk`,
+is an ordinary congruence.
+-/
+def packValueOnlyTheorem (c : SimpCongrTheorem) : MetaM Bool := do
+  let type ← inferType (← mkConstWithFreshMVarLevels c.theoremName)
+  forallTelescopeReducing type fun _ concl => return concl.isEq
+
+/--
+Assigns the unassigned metavariables of the pattern `p` that occur as arguments of applications with
+the same constant head and arity as in `e`, to the corresponding subterms of `e`. `isDefEq p e` must
+validate the result. Unification alone could assign a metavariable from another occurrence, e.g.
+`?f := g` (eta-reduced) from `?f b =?= g b`, while `e` has `fun x => g x` at this position.
+-/
+partial def preMatchCongrPattern (p e : Expr) : MetaM Unit := do
+  if p.isMVar then
+    unless (← p.mvarId!.isAssigned) || p.hasLooseBVars || e.hasLooseBVars do
+      p.mvarId!.assign e
+  else if p.isApp && e.isApp then
+    let pf := p.getAppFn
+    let ef := e.getAppFn
+    -- The levels of `pf` are fresh metavariables: unify them, since assigning the arguments below
+    -- skips the type checks that would.
+    if pf.isConst && pf.constName? == ef.constName? && p.getAppNumArgs == e.getAppNumArgs then
+      for lp in pf.constLevels!, le in ef.constLevels! do
+        discard <| isLevelDefEq lp le
+      for pa in p.getAppArgs, ea in e.getAppArgs do
+        preMatchCongrPattern pa ea
+
+/--
+Tries to rewrite `e` with the `@[dsimp_congr]` theorem `c`: dsimps the left-hand sides of its
+hypotheses and rebuilds `e` from the right-hand side. Returns `e` itself if
+the theorem applies without progress.
+
+In `simpMode`, the new parameters of `HEq` hypotheses that are trailing arguments of the right-hand
+side are not dsimped but left to `simp`, together with the arguments of `e` beyond the left-hand
+side; the second component is the number of these trailing arguments.
+-/
+private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode := false) :
+    SimpM (Option (Expr × Nat)) := withNewMCtxDepth do
+  let h0 ← IO.getNumHeartbeats
+  let mode := if simpMode then "simp" else "dsimp"
+  let thmShort := c.theoremName.getString!
+  let thm ← mkConstWithFreshMVarLevels c.theoremName
+  let (xs, bis, type) ← forallMetaTelescopeReducing (← inferType thm)
+  let some (lhs, rhs) := type.eqOrIff? <|> type.heq?.map fun (_, lhs, _, rhs) => (lhs, rhs)
+    | return none
+  -- The trailing arguments of the right-hand side that are new parameters of `HEq` hypotheses.
+  let heqOuts ← c.hypothesesPos.filterMapM fun i => do
+    return (← inferType xs[i]!).heq?.bind fun (_, _, _, r) => if r.isMVar then some r.mvarId! else none
+  let rhsArgs := rhs.getAppArgs
+  let numTrailing := if simpMode then
+    (rhsArgs.reverse.toList.takeWhile fun a => a.isMVar && heqOuts.contains a.mvarId!).length else 0
+  let trailing := rhsArgs.extract (rhsArgs.size - numTrailing) rhsArgs.size |>.map (·.mvarId!)
+  let numArgs := lhs.getAppNumArgs
+  let args := e.getAppArgs
+  if args.size < numArgs then return none
+  let eFn := mkAppN e.getAppFn (args.extract 0 numArgs)
+  let extraArgs := args.extract numArgs args.size
+  for x in xs, bi in bis do
+    if bi.isInstImplicit then x.mvarId!.setKind .syntheticOpaque
+  if (← get).packCongrFailures.contains (c.theoremName, eFn) then
+    recordPackStat s!"{mode} {thmShort} cachedfail" ((← IO.getNumHeartbeats) - h0)
+    return none
+  let hInst ← IO.getNumHeartbeats
+  preMatchCongrPattern lhs eFn
+  let lhs ← instantiateMVars lhs
+  let strictFail := simp.packCongr.strictMatch.get (← getOptions) && lhs.hasExprMVar
+  unless !strictFail && (← withSimpMetaConfig <| withAssignableSyntheticOpaque <| isDefEq lhs eFn) do
+    modify fun s => { s with packCongrFailures := s.packCongrFailures.insert (c.theoremName, eFn) }
+    recordPackStat s!"{mode} {thmShort} instantiate" (hInst - h0)
+    recordPackStat s!"{mode} {thmShort} matchfail" ((← IO.getNumHeartbeats) - hInst)
+    return none
+  let h1 ← IO.getNumHeartbeats
+  recordPackStat s!"{mode} {thmShort} instantiate" (hInst - h0)
+  recordPackStat s!"{mode} {thmShort} match" (h1 - hInst)
+  let mut modified := false
+  for i in c.hypothesesPos do
+    let hType ← instantiateMVars (← inferType xs[i]!)
+    if let some (_, l, _, r) := hType.heq? then
+      let l ← instantiateMVars l
+      let r ← instantiateMVars r
+      let l' ← if trailing.contains r.mvarId! then pure l else dsimp l
+      r.mvarId!.assign l'
+      modified := modified || l' != l
+    else if let some (l, r) := hType.eqOrIff? then
+      let l ← instantiateMVars l
+      let r ← instantiateMVars r
+      if r.isMVar then
+        let l' ← dsimp l
+        r.mvarId!.assign l'
+        modified := modified || l' != l
+      else
+        let some (ci, us, rArgs) ← packCtorApp? r | return none
+        let v ← packEtaM l
+        let v' ← if simp.packCongr.ctorOnly.get (← getOptions) && (← packCtorApp? v).isSome then
+            dsimpPackValue v
+          else withPackCtorGuard <| dsimp v
+        let vals ← packFields ci us (rArgs.extract 0 ci.numParams) v'
+        for m in rArgs.extract ci.numParams rArgs.size, val in vals do
+          m.mvarId!.assign val
+        modified := modified || v' != v
+    else
+      return none
+  let h2 ← IO.getNumHeartbeats
+  recordPackStat s!"{mode} {thmShort} hyps" (h2 - h1)
+  -- The hypotheses are not needed: no proof is built.
+  let params := (xs.zip bis).zipIdx.filterMap fun (xb, i) =>
+    if c.hypothesesPos.contains i then none else some xb
+  unless (← withAssignableSyntheticOpaque <|
+      synthesizeArgs (.decl c.theoremName) (params.map (·.2)) (params.map (·.1))) do
+    return none
+  let eNew ← if modified || simp.packCongr.canonicalize.get (← getOptions) then instantiateCongrRhs rhs xs
+    else pure eFn
+  modified := modified || eNew != eFn
+  if (← hasAssignableMVar eNew) then return none
+  if modified then
+    trace[Meta.Tactic.simp.congr] "dsimp_congr {c.theoremName}{indentExpr e}\n==>{indentExpr eNew}"
+  recordPackStat s!"{mode} {thmShort} finish {modified}" ((← IO.getNumHeartbeats) - h2)
+  if simpMode then
+    return some (mkAppN eNew extraArgs, numTrailing + extraArgs.size)
+  return some (mkAppN eNew (← extraArgs.mapM dsimp), 0)
+
+/--
+Applies `@[dsimp_congr]` theorems at the head of `e`. A theorem that applies replaces the visit of
+the arguments of `e`, so `post` runs right away.
+-/
+private def dsimpCongr (post : DSimproc) : DSimproc := fun e => do
+  let .const fName _ := e.getAppFn | return .continue
+  let thms := (← getDSimpCongrTheorems).get fName
+  if thms.isEmpty then return .continue
+  let ctorOnly ← inPackValueOnly e
+  for c in (← congrCandidates fName true thms e) do
+    if ctorOnly && (← packValueOnlyTheorem c) then continue
+    let hb ← IO.getNumHeartbeats
+    let r ← tryDSimpCongrTheorem? c e
+    trace[Debug.Meta.Tactic.simp.congrCost] "dsimp {c.theoremName} {(← IO.getNumHeartbeats) - hb} {r.isSome} {r.any (·.1 != e)}"
+    if let some (eNew, _) := r then
+      return match (← post eNew) with
+        | .visit e' => .visit e'
+        | .done e' | .continue (some e') => .done e'
+        | .continue none => .done eNew
+  return .continue
+
+private partial def dsimpImplCore (e : Expr) : SimpM Expr := do
   let cfg ← getConfig
   unless cfg.dsimp do
     return e
   let m ← getMethods
-  let pre := m.dpre >> doNotVisitOfNat >> doNotVisitOfScientific >> doNotVisitCharLit >> doNotVisitProofs
   let post := m.dpost >> dsimpReduce
+  let pre := m.dpre >> dsimpCongr post >> doNotVisitOfNat >> doNotVisitOfScientific >> doNotVisitCharLit >> doNotVisitProofs
   let checkInstanceTypes := backward.dsimp.instanceTypes.get (← getOptions)
   withInDSimpWithCache fun cache => do
     transformWithCache e cache
@@ -575,6 +912,16 @@ private partial def dsimpImpl (e : Expr) : SimpM Expr := do
       (post := post)
       (postApp := fun orig new =>
         if checkInstanceTypes then revertInstanceTypeChanges orig new else return new)
+
+set_option compiler.ignoreBorrowAnnotation true in
+@[export lean_dsimp]
+private def dsimpImpl (e : Expr) : SimpM Expr := do
+  if (← isTracingEnabledFor `Debug.Meta.Tactic.simp.dsimpCost) then
+    let hb ← IO.getNumHeartbeats
+    let r ← dsimpImplCore e
+    trace[Debug.Meta.Tactic.simp.dsimpCost] "{(← IO.getNumHeartbeats) - hb} {e != r}:{indentExpr e}"
+    return r
+  dsimpImplCore e
 
 def visitFn (e : Expr) : SimpM Result := do
   let f := e.getAppFn
@@ -630,8 +977,79 @@ def processCongrHypothesis (h : Expr) (hType : Expr) : SimpM Bool := do
       -/
       return r.proof?.isSome || (xs.size > 0 && lhs != r.expr)
 
+/--
+Records `e`, the result of a pack congruence theorem, as simplified, so that `simp` does not visit it
+again (and match the theorem again) unless a post-lemma rewrites it (compare
+`simp.congrView.markResult`).
+-/
+def markSimplified (e : Expr) : SimpM Unit := do
+  -- Results inside pack values are not results of `simp` on the same terms elsewhere.
+  if (← getConfig).memoize && !(← packOld 2) && !(← get).inPackValue then
+    modify fun s => { s with cache := s.cache.insert e { expr := e } }
+
+/--
+Whether every instance argument in the right-hand side of the congruence theorem `declName` has its
+expected type at `.instances` transparency, for all values of the parameters.
+-/
+def packCongrConsistent (declName : Name) : SimpM Bool := do
+  if let some b := (← get).packCongrConsistent[declName]? then return b
+  let type ← inferType (← mkConstWithLevelParams declName)
+  let b ← forallTelescopeReducing type fun _ type => instancesConsistent type.appArg!
+  modify fun s => { s with packCongrConsistent := s.packCongrConsistent.insert declName b }
+  return b
+
+/--
+Processes a hypothesis of a pack congruence theorem (see `mkSimpCongrTheorem`): a pack hypothesis
+`p = S.mk ps fs'` or a hypothesis `a = a'` without binders. Returns whether it made progress, also by
+a definitional rewrite, or `none` for other hypotheses. A pack hypothesis simplifies the pack value
+`p`, keeping it a constructor application (see `simp.packCongr.ctorOnly`).
+-/
+def processPackCongrHypothesis? (h hType : Expr) (defeq := true) : SimpM (Option Bool) := do
+  if let some (_, lhs, _, rhs) := hType.heq? then
+    -- DEBUG (`debug.simp.congr.allowHEq`)
+    let lhs ← instantiateMVars lhs
+    let r ← simp lhs
+    let rhs ← instantiateMVars rhs
+    unless rhs.isMVar do throwCongrHypothesisFailed
+    if defeq then rhs.mvarId!.assign r.expr
+    else unless (← withSimpMetaConfig <| isDefEq rhs r.expr) do throwCongrHypothesisFailed
+    let proof ← match r.proof? with
+      | none   => mkHEqRefl lhs
+      | some p => do
+        let α ← inferType lhs
+        pure <| mkApp4 (mkConst ``heq_of_eq [← getLevel α]) α lhs r.expr p
+    h.mvarId!.assign (← mkExpectedTypeHint proof (← instantiateMVars hType))
+    if (← packOld 8) then return some r.proof?.isSome
+    return some (r.expr != lhs)
+  let some (_, lhs, rhs) := hType.eq? | return none
+  let rhs ← instantiateMVars rhs
+  if rhs.isMVar then
+    -- A plain hypothesis `a = a'`: unlike in other congruence theorems, a definitional rewrite
+    -- counts as progress, since the default congruence cannot rewrite `a` together with the
+    -- arguments that depend on it.
+    let lhs ← instantiateMVars lhs
+    let r ← simp lhs
+    unless (← withSimpMetaConfig <| isDefEq rhs r.expr) do throwCongrHypothesisFailed
+    h.mvarId!.assign (← mkExpectedTypeHint (← r.getProof) (← instantiateMVars hType))
+    return some (r.expr != lhs)
+  if rhs.getAppFn.isMVar then return none
+  let some (ci, us, rArgs) ← packCtorApp? rhs | return none
+  let v ← packEtaM (← instantiateMVars lhs)
+  let r ← if simp.packCongr.ctorOnly.get (← getOptions) && (← packCtorApp? v).isSome then
+      simpPackValue v
+    else withPackCtorGuard <| simp v
+  let vals ← packFields ci us (rArgs.extract 0 ci.numParams) r.expr
+  for m in rArgs.extract ci.numParams rArgs.size, val in vals do
+    unless (← withSimpMetaConfig <| withAssignableSyntheticOpaque <| isDefEq m val) do
+      throwCongrHypothesisFailed
+  let proof ← match r.proof? with
+    | none   => mkEqRefl v
+    | some p => pure p
+  h.mvarId!.assign (← mkExpectedTypeHint proof (← instantiateMVars hType))
+  return some (r.expr != v)
+
 /-- Try to rewrite `e` children using the given congruence theorem -/
-def trySimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) : SimpM (Option Result) := withNewMCtxDepth do withParent e do
+def trySimpCongrTheoremCore? (c : SimpCongrTheorem) (e : Expr) : SimpM (Option Result) := withNewMCtxDepth do withParent e do
   recordCongrTheorem c.theoremName
   trace[Debug.Meta.Tactic.simp.congr] "{c.theoremName}, {e}"
   let thm ← mkConstWithFreshMVarLevels c.theoremName
@@ -641,7 +1059,11 @@ def trySimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) : SimpM (Option Resul
   if c.hypothesesPos.any (· ≥ xs.size) then
     return none
   let isIff := type.isAppOf ``Iff
-  let lhs := type.appFn!.appArg!
+  let isHEq := type.isHEq
+  let pack ← pure isHEq <||> c.hypothesesPos.anyM fun i => do
+    let t ← inferType xs[i]!
+    return isPackHypothesis t || t.isHEq
+  let lhs := if isHEq then type.appFn!.appFn!.appArg! else type.appFn!.appArg!
   let rhs := type.appArg!
   let numArgs := lhs.getAppNumArgs
   let mut e := e
@@ -650,15 +1072,35 @@ def trySimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) : SimpM (Option Resul
     let args := e.getAppArgs
     e := mkAppN e.getAppFn args[*...numArgs]
     extraArgs := args[numArgs...*].toArray
-  if (← withSimpMetaConfig <| isDefEq lhs e) then
+  if pack then
+    -- Take instances from the term instead of synthesizing them during unification (see
+    -- `congrView?`).
+    for x in xs, bi in bis do
+      if bi.isInstImplicit then x.mvarId!.setKind .syntheticOpaque
+  if pack then
+    if !(← packOld 4) && (← get).packCongrFailures.contains (c.theoremName, e) then return none
+    preMatchCongrPattern lhs e
+  -- Instantiated, the pattern is often free of metavariables, so that the defeq cache applies.
+  let lhs' ← if pack then instantiateMVars lhs else pure lhs
+  if pack && simp.packCongr.strictMatch.get (← getOptions) && lhs'.hasExprMVar then
+    modify fun s => { s with packCongrFailures := s.packCongrFailures.insert (c.theoremName, e) }
+    return none
+  if (← withSimpMetaConfig <| (if pack then withAssignableSyntheticOpaque else id) <| isDefEq lhs' e) then
     let mut modified := false
+    let mut defeq := true
     for i in c.hypothesesPos do
       let h := xs[i]!
       let hType ← instantiateMVars (← inferType h)
       let hType ← if thmHasBinderNameHint then hType.resolveBinderNameHint else pure hType
       try
-        if (← processCongrHypothesis h hType) then
+        if let some progress ← (if pack then processPackCongrHypothesis? h hType defeq else pure none) then
+          modified := modified || progress
+          -- conservatively: any non-`HEq` hypothesis with a proof breaks definitional typing
+          unless hType.isHEq do
+            if (← instantiateMVars h).isAppOf ``Eq.refl |>.not then pure ()
+        else if (← processCongrHypothesis h hType) then
           modified := true
+          defeq := false
       catch _ =>
         trace[Meta.Tactic.simp.congr] "processCongrHypothesis {c.theoremName} failed {hType}"
         -- Remark: we don't need to check ex.isMaxRecDepth anymore since `try .. catch ..`
@@ -666,43 +1108,347 @@ def trySimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) : SimpM (Option Resul
         return none
     unless modified do
       trace[Meta.Tactic.simp.congr] "{c.theoremName} not modified"
+      -- Other congruence theorems or the default congruence would only rewrite the parts of the
+      -- packs separately.
+      if pack && !debug.simp.packCongr.fallback.get (← getOptions) then
+        return some (← congrArgs { expr := e } extraArgs)
       return none
-    unless (← synthesizeArgs (.decl c.theoremName) bis xs) do
+    unless (← (if pack then withAssignableSyntheticOpaque else id) <| synthesizeArgs (.decl c.theoremName) bis xs) do
       trace[Meta.Tactic.simp.congr] "{c.theoremName} synthesizeArgs failed"
       return none
-    let eNew ← instantiateMVars rhs
+    if pack then
+      for x in xs do
+        unless (← x.mvarId!.isAssigned) do
+          trace[Meta.Tactic.simp.congr] "{c.theoremName} has unassigned parameters"
+          return none
+    let eNew ← if pack then instantiateCongrRhs rhs xs else instantiateMVars rhs
     let mut proof ← instantiateMVars (mkAppN thm xs)
+    if isHEq then
+      -- DEBUG (`debug.simp.congr.allowHEq`)
+      let α ← inferType e
+      proof := mkApp4 (mkConst ``eq_of_heq [← getLevel α]) α e eNew proof
     if isIff then
       try proof ← mkAppM ``propext #[proof]
       catch _ => return none
     if (← hasAssignableMVar proof <||> hasAssignableMVar eNew) then
       trace[Meta.Tactic.simp.congr] "{c.theoremName} has unassigned metavariables"
       return none
-    congrArgs { expr := eNew, proof? := proof } extraArgs
+    let r ← congrArgs { expr := eNew, proof? := proof } extraArgs
+    if pack then
+      let consistent ← pure extraArgs.isEmpty <&&> packCongrConsistent c.theoremName
+      modify fun s => { s with congrResultConsistent := consistent }
+      markSimplified r.expr
+    return r
   else
+    if pack then
+      modify fun s => { s with packCongrFailures := s.packCongrFailures.insert (c.theoremName, e) }
     return none
 
-def congr (e : Expr) : SimpM Result := do
+def trySimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) : SimpM (Option Result) := do
+  let hb ← IO.getNumHeartbeats
+  let r ← trySimpCongrTheoremCore? c e
+  recordPackStat s!"congr {c.theoremName.getString!} {r.isSome}" ((← IO.getNumHeartbeats) - hb)
+  trace[Debug.Meta.Tactic.simp.congrCost] "simp {c.theoremName} {(← IO.getNumHeartbeats) - hb} {r.isSome} {r.any (·.expr != e)}"
+  return r
+
+/--
+Performs congruence on `e` through a `@[congr_view]` view: rewrites `e` to the view, performs
+congruence there using `congrCore`, and unfolds the view function again. The flag in the result
+says whether its instance arguments need no check against `backward.dsimp.instanceTypes`.
+-/
+def congrView? (congrCore : Expr → SimpM Result) (e : Expr) : SimpM (Option (Result × Bool)) := do
+  let views ← getCongrViews
+  if views.root.isEmpty then return none
+  let candidates ← withSimpIndexConfig <| views.getMatchWithExtra e
+  if candidates.isEmpty then return none
+  let args := e.getAppArgs
+  unless simp.congrView.enabled.get (← getOptions) do
+    let h0 ← IO.getNumHeartbeats
+    let r ← congrCore e
+    trace[Debug.Meta.Tactic.simp.congrViewCost] "plain congr={(← IO.getNumHeartbeats) - h0} progress={r.expr != e}:{indentExpr e}"
+    return some (r, false)
+  for (v, numExtra) in candidates do
+    let eFn := mkAppN e.getAppFn args[*...(args.size - numExtra)]
+    let extraArgs := args[(args.size - numExtra)...*].toArray
+    let h0 ← IO.getNumHeartbeats
+    let some eView ← instantiateView? v eFn
+      | trace[Debug.Meta.Tactic.simp.congrViewCost] "fail match={(← IO.getNumHeartbeats) - h0}:{indentExpr e}"
+        continue
+    let h1 ← IO.getNumHeartbeats
+    let r ← congrCore eView
+    let h2 ← IO.getNumHeartbeats
+    if r.expr == eView then
+      trace[Meta.Tactic.simp.congrView] "{.ofConstName v.theoremName}: no progress on{indentExpr e}"
+      let r ← congrArgs { expr := eFn } extraArgs
+      trace[Debug.Meta.Tactic.simp.congrViewCost] "view match={h1 - h0} congr={h2 - h1} consistent=0 unfold=0 proof={(← IO.getNumHeartbeats) - h2} progress=false:{indentExpr e}"
+      return some (r, false)
+    let consistent ← pure v.instancesConsistent <&&>
+      (pure !backward.dsimp.instanceTypes.get (← getOptions) <||>
+        return (← revertInstanceTypeChanges eView r.expr) == r.expr)
+    let h3 ← IO.getNumHeartbeats
+    let eNew ← unfoldCongrView v.viewFn r.expr
+    let h4 ← IO.getNumHeartbeats
+    let proof? ← r.proof?.mapM fun h => do mkExpectedTypeHint h (← mkEq eFn eNew)
+    let r ← congrArgs { expr := eNew, proof? } extraArgs
+    trace[Debug.Meta.Tactic.simp.congrViewCost] "view match={h1 - h0} congr={h2 - h1} consistent={h3 - h2} unfold={h4 - h3} proof={(← IO.getNumHeartbeats) - h4} progress=true:{indentExpr e}"
+    if r.expr == e then
+      trace[Meta.Tactic.simp.congrView] "{.ofConstName v.theoremName}: round trip without change on{indentExpr e}"
+      return some ({ expr := e }, true)
+    trace[Meta.Tactic.simp.congrView] "{.ofConstName v.theoremName}:{indentExpr e}\n==>{indentExpr r.expr}"
+    if simp.congrView.markResult.get (← getOptions) && (← getConfig).memoize then
+      modify fun s => { s with cache := s.cache.insert r.expr { expr := r.expr } }
+    return some (r, consistent && extraArgs.isEmpty)
+  return none
+where
+  /--
+  Returns the right-hand side of `v` instantiated so that its left-hand side is defeq to `eFn`.
+
+  Successful matches are cached by the head of `eFn` and its arguments at the non-data positions
+  (see `CongrView.dataPos`), provided these contain no metavariables. This is sound: if `eFn'` has
+  the same head and the same arguments at the non-data positions, then instantiating the non-data
+  parameters as for `eFn` and each data parameter with the argument of `eFn'` at its position
+  makes the left-hand side agree with `eFn'` at the non-data positions up to the defeq
+  established for `eFn`, and syntactically at the data positions. The data parameters are
+  well-typed because their types only depend on non-data parameters, and the types of the
+  corresponding arguments of `eFn'` only depend on its non-data arguments.
+  -/
+  instantiateView? (v : CongrView) (eFn : Expr) : SimpM (Option Expr) := do
+    let fnArgs := eFn.getAppArgs
+    let key? : Option (Name × Expr × Array Expr) :=
+      if v.dataPos.isEmpty then none else
+        let nonData := fnArgs.toList.zipIdx.filterMap fun (a, q) =>
+          if v.dataPos.any (·.2 == q) then none else some a
+        if eFn.getAppFn.hasMVar || nonData.any (·.hasMVar) then none
+        else some (v.theoremName, eFn.getAppFn, nonData.toArray)
+    if let some key := key? then
+      if let some (thm, vals) := (← get).congrViewCache[key]? then
+        let mut vals? := vals
+        for (i, p) in v.dataPos do
+          vals? := vals?.set! i (some fnArgs[p]!)
+        let some vals := vals?.mapM id | return none
+        let type ← instantiateForall (← inferType thm) vals
+        let some (_, _, rhs) := type.eq? | return none
+        trace[Debug.Meta.Tactic.simp.congrView] "{.ofConstName v.theoremName}: cached instantiation"
+        return some rhs
+    let some (rhs, thm, vals) ← withNewMCtxDepth do
+        let thm ← mkConstWithFreshMVarLevels v.theoremName
+        let (xs, bis, type) ← forallMetaTelescope (← inferType thm)
+        let some (_, lhs, rhs) := type.eq? | return none
+        if simp.congrView.unifyInstances.get (← getOptions) then
+          -- `isDefEq` would synthesize stuck instance metavariables (`synthPending`), possibly
+          -- choosing a different instance path than the term, which every later comparison then
+          -- has to bridge. `synthPending` skips synthetic opaque metavariables.
+          let insts := (xs.zip bis).filterMap fun (x, bi) => if bi.isInstImplicit then some x.mvarId! else none
+          for m in insts do m.setKind .syntheticOpaque
+          unless (← withSimpMetaConfig <| withAssignableSyntheticOpaque <| isDefEq lhs eFn) do return none
+          for m in insts do
+            unless (← m.isAssigned) do
+              let some val ← synthInstance? (← m.getType) | return none
+              unless (← withAssignableSyntheticOpaque <| isDefEq (mkMVar m) val) do return none
+        else
+          unless (← withSimpMetaConfig <| isDefEq lhs eFn) do return none
+        let rhs ← instantiateMVars rhs
+        if rhs.hasMVar then return none
+        let thm ← instantiateMVars thm
+        let vals ← xs.mapM fun x => do
+          let x ← instantiateMVars x
+          return if x.hasMVar then none else some x
+        return some (rhs, thm, vals)
+      | return none
+    if let some key := key? then
+      let vals := v.dataPos.foldl (init := vals) fun vals (i, _) => vals.set! i none
+      let nonDataOk := (List.range vals.size).all fun i => v.dataPos.any (·.1 == i) || vals[i]!.isSome
+      if nonDataOk && !thm.hasMVar then
+        modify fun s => { s with congrViewCache := s.congrViewCache.insert key (thm, vals) }
+    return some rhs
+
+/--
+Applies a `@[dsimp_congr]` theorem in `simp`: rewrites `e` definitionally as `dsimp` would, except
+for the trailing arguments that are new parameters of `HEq` hypotheses, which are then simplified by
+ordinary congruence (see `tryDSimpCongrTheorem?`). Thus a proof is only needed for these arguments,
+and it does not involve `HEq`.
+-/
+def dsimpCongrInSimp? (e : Expr) (skip : List SimpCongrTheorem) : SimpM (Option Result) := do
+  let .const fName _ := e.getAppFn | return none
+  let thms := (← getDSimpCongrTheorems).get fName
+  if thms.isEmpty then return none
+  let ctorOnly ← inPackValueOnly e
+  for c in (← congrCandidates fName true thms e) do
+    -- `simp` applies theorems that are also `@[congr]` theorems with proofs instead.
+    if skip.any (·.theoremName == c.theoremName) then continue
+    if ctorOnly && (← packValueOnlyTheorem c) then continue
+    let hb ← IO.getNumHeartbeats
+    let some (eNew, n) ← tryDSimpCongrTheorem? c e (simpMode := true) | continue
+    let args := eNew.getAppArgs
+    let k := args.size - n
+    let hA ← IO.getNumHeartbeats
+    let r ← congrArgs { expr := mkAppN eNew.getAppFn (args.extract 0 k) } (args.extract k args.size)
+    recordPackStat s!"simp {c.theoremName.getString!} trailingArgs" ((← IO.getNumHeartbeats) - hA)
+    trace[Debug.Meta.Tactic.simp.congrCost] "simp-dsimp_congr {c.theoremName} {(← IO.getNumHeartbeats) - hb} true {r.expr != e}"
+    if r.expr == e then
+      if debug.simp.packCongr.fallback.get (← getOptions) then return none
+      return some { expr := e }
+    let consistent ← packCongrConsistent c.theoremName
+    modify fun s => { s with congrResultConsistent := consistent }
+    markSimplified r.expr
+    let proof? ← r.proof?.mapM fun h => do mkExpectedTypeHint h (← mkEq e r.expr)
+    return some { r with proof? }
+  return none
+
+def congrCore (e : Expr) : SimpM Result := do
   let f := e.getAppFn
   if f.isConst then
     let congrThms ← getSimpCongrTheorems
-    let cs := congrThms.get f.constName!
-    for c in cs do
-      match (← trySimpCongrTheorem? c e) with
-      | none   => pure ()
-      | some r => return r
+    let disabled := debug.simp.congr.disabled.get (← getOptions)
+    let all := (congrThms.get f.constName!).filter fun c => disabled != c.theoremName.toString
+    let cs ← if all.isEmpty then pure all else congrCandidates f.constName! false all e
+    -- Pack congruence theorems come first: their index already checked the left-hand side.
+    let packs : NameSet := ((← get).packCongrIndex[(f.constName!, false)]?.map (·.2)).getD {}
+    let (packCs, otherCs) := cs.partition (packs.contains ·.theoremName)
+    for c in packCs do
+      if let some r ← trySimpCongrTheorem? c e then return r
+    if let some r ← dsimpCongrInSimp? e all then return r
+    for c in otherCs do
+      if let some r ← trySimpCongrTheorem? c e then return r
     congrDefault e
   else
     congrDefault e
+
+def congr (e : Expr) : SimpM Result := do
+  if let some (r, _) ← congrView? congrCore e then return r
+  congrCore e
+
+/-- Whether both sides of the `simp` theorem `thm` are applications of a pack constructor. -/
+def isPackCtorTheorem (thm : SimpTheorem) : SimpM Bool := do
+  let key := thm.origin.key
+  if let some b := (← get).packCtorThms[key]? then return b
+  let b ← withNewMCtxDepth do
+    forallTelescopeReducing (← inferType (← thm.getValue)) fun _ type => do
+      let some (_, lhs, rhs) := type.eq? | return false
+      return (← packCtorApp? lhs).isSome && (← packCtorApp? rhs).isSome
+  modify fun s => { s with packCtorThms := s.packCtorThms.insert key b }
+  return b
+
+/-- Rewrites the pack value `e` at its root by a `simp` theorem whose sides are pack values. -/
+def rewritePackRoot? (e : Expr) (rflOnly : Bool) : SimpM (Option Result) := do
+  for thms in (← getSimpTheorems) do
+    let cands ← withSimpIndexConfig <| thms.post.getMatchWithExtra e
+    for (thm, n) in cands.insertionSort (fun a b => a.1.priority > b.1.priority) do
+      if thms.erased.contains thm.origin then continue
+      if rflOnly && !thm.rfl then continue
+      unless (← isPackCtorTheorem thm) do continue
+      if let some r ← tryTheoremWithExtraArgs? e thm n then
+        if r.expr != e then return some r
+  return none
+
+/--
+The trailing arguments of `e` that are explicit and that no other argument depends on: they can be
+rewritten without the other fields of a pack value, e.g. the iterator in `IterPack.mk α it`.
+-/
+def independentTrailingArgs (e : Expr) : MetaM Nat := do
+  let args := e.getAppArgs
+  let infos := (← getFunInfoNArgs e.getAppFn args.size).paramInfo
+  let mut k := args.size
+  while h : 0 < k ∧ k ≤ infos.size do
+    let info := infos[k - 1]
+    unless info.binderInfo.isExplicit && !info.hasFwdDeps do break
+    k := k - 1
+  return args.size - k
+
+/-- Runs `x` while simplifying a pack value (see `State.inPackValue`). -/
+def withInPackValue (x : SimpM α) : SimpM α := do
+  let saved := (← get).inPackValue
+  modify fun s => { s with inPackValue := true }
+  try x finally modify fun s => { s with inPackValue := saved }
+
+set_option compiler.ignoreBorrowAnnotation true in
+@[export lean_simp_pack_value]
+partial def simpPackValueImpl (v : Expr) : SimpM Result := do
+  if let some r := (← get).packValueCache[v]? then return r
+  let r ← withInPackValue <| loop { expr := v } 0
+  modify fun s => { s with packValueCache := s.packValueCache.insert v r }
+  return r
+where
+  loop (acc : Result) (i : Nat) : SimpM Result := do
+    if i > 64 then return acc
+    let v := acc.expr
+    let mut step? ← congrStep? v
+    if step?.isNone then step? ← fieldsStep? v
+    if step?.isNone then step? ← rewritePackRoot? v false
+    let some r := step? | return acc
+    if r.expr == v then return acc
+    loop (← acc.mkEqTrans r) (i + 1)
+  congrStep? (v : Expr) : SimpM (Option Result) := do
+    let .const fName _ := v.getAppFn | return none
+    let all := (← getSimpCongrTheorems).get fName
+    unless all.isEmpty do
+      let cs ← congrCandidates fName false all v
+      let packs : NameSet := ((← get).packCongrIndex[(fName, false)]?.map (·.2)).getD {}
+      for c in cs do
+        unless packs.contains c.theoremName do continue
+        if let some r ← trySimpCongrTheorem? c v then
+          if r.expr != v then return some r
+    if let some r ← dsimpCongrInSimp? v all then
+      if r.expr != v then return some r
+    return none
+  fieldsStep? (v : Expr) : SimpM (Option Result) := do
+    let n ← independentTrailingArgs v
+    if n == 0 then return none
+    let args := v.getAppArgs
+    let k := args.size - n
+    let r ← congrArgs { expr := mkAppN v.getAppFn (args.extract 0 k) } (args.extract k args.size)
+    return if r.expr == v then none else some r
+
+set_option compiler.ignoreBorrowAnnotation true in
+@[export lean_dsimp_pack_value]
+partial def dsimpPackValueImpl (v : Expr) : SimpM Expr := do
+  if let some r := (← get).packValueDCache[v]? then return r
+  let r ← withInPackValue <| loop v 0
+  modify fun s => { s with packValueDCache := s.packValueDCache.insert v r }
+  return r
+where
+  loop (v : Expr) (i : Nat) : SimpM Expr := do
+    if i > 64 then return v
+    let mut step? ← congrStep? v
+    if step?.isNone then step? ← fieldsStep? v
+    if step?.isNone then step? ← (·.map (·.expr)) <$> rewritePackRoot? v true
+    let some v' := step? | return v
+    if v' == v then return v
+    loop v' (i + 1)
+  congrStep? (v : Expr) : SimpM (Option Expr) := do
+    let .const fName _ := v.getAppFn | return none
+    let thms := (← getDSimpCongrTheorems).get fName
+    if thms.isEmpty then return none
+    for c in (← congrCandidates fName true thms v) do
+      if let some (v', _) ← tryDSimpCongrTheorem? c v then
+        if v' != v then return some v'
+    return none
+  fieldsStep? (v : Expr) : SimpM (Option Expr) := do
+    let n ← independentTrailingArgs v
+    if n == 0 then return none
+    let args := v.getAppArgs
+    let k := args.size - n
+    let fields ← (args.extract k args.size).mapM dsimp
+    let v' := mkAppN v.getAppFn (args.extract 0 k ++ fields)
+    return if v' == v then none else some v'
 
 def simpApp (e : Expr) : SimpM Result := do
   if isOfNatNatLit e || isOfScientificLit e || isCharLit e then
     -- Recall that we fold "orphan" kernel Nat literals `n` into `OfNat.ofNat n`
     return { expr := e }
   else
-    let r ← congr e
+    modify fun s => { s with congrResultConsistent := false }
+    let (r, consistent) ← match (← congrView? congrCore e) with
+      | some r => pure r
+      | none => do
+        let r ← congrCore e
+        pure (r, (← get).congrResultConsistent)
     unless backward.dsimp.instanceTypes.get (← getOptions) do return r
+    if consistent && simp.congrView.skipInstanceCheck.get (← getOptions) then return r
+    let hb ← IO.getNumHeartbeats
     let eNew ← revertInstanceTypeChanges e r.expr
+    recordPackStat "simpApp check" ((← IO.getNumHeartbeats) - hb)
+    trace[Debug.Meta.Tactic.simp.instanceCheckCost] "{(← IO.getNumHeartbeats) - hb} view={consistent} reverted={eNew != r.expr}:{indentExpr e}" 
     if eNew == r.expr then return r
     -- Arguments that instance arguments depend on are only rewritten definitionally, except
     -- possibly by user congruence theorems.
