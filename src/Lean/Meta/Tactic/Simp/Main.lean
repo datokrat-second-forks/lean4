@@ -647,7 +647,14 @@ private partial def revertInstanceTypeChanges (orig new : Expr) : MetaM Expr := 
       -- Keep rewrites that do not cause the mismatch.
       unless (← hasExpectedType origFType origArgs j) do continue
       reverts := (info.backDeps.push j).filter changed
-      trace[Meta.Tactic.simp.instanceTypes] "reverting the rewrites of the arguments at positions {reverts} of{indentExpr new}\nbecause the instance{indentExpr args[j]!}\ndoes not have the expected type at `.instances` transparency"
+      if (← isTracingEnabledFor `Meta.Tactic.simp.instanceTypes) then
+        let mut msg := m!"reverting the rewrites of the arguments at positions {reverts} of{indentExpr new}"
+        for i in reverts do
+          msg := msg ++ m!"\nargument {i} of `{f}`:{indentExpr origArgs[i]!}\nwas rewritten to{indentExpr args[i]!}"
+        let instType ← inferType args[j]!
+        let expected ← instantiateForall fType (args.extract 0 j)
+        let expected := (← whnf expected).bindingDomain!
+        addTrace `Meta.Tactic.simp.instanceTypes <| msg ++ m!"\nbecause the instance{indentExpr args[j]!}\nof type{indentExpr instType}\ndoes not have the expected type{indentExpr expected}\nat `.instances` transparency"
       break
     if reverts.isEmpty then break
     for i in reverts do
