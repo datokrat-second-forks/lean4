@@ -897,6 +897,8 @@ private def dsimpCongr (post : DSimproc) : DSimproc := fun e => do
     let r ← tryDSimpCongrTheorem? c e
     trace[Debug.Meta.Tactic.simp.congrCost] "dsimp {c.theoremName} {(← IO.getNumHeartbeats) - hb} {r.isSome} {r.any (·.1 != e)}"
     if let some (eNew, _) := r then
+      -- Without progress, the arguments still need the plain visit, as in `simp`.
+      if eNew == e && debug.simp.packCongr.fallback.get (← getOptions) then continue
       return match (← post eNew) with
         | .visit e' => .visit e'
         | .done e' | .continue (some e') => .done e'

@@ -263,3 +263,17 @@ error: Invalid `congr` theorem: Parameter #8 is an `HEq` hypothesis, which only 
 @[congr] theorem bad4 {α α' : Type} [Add α] [Add α'] (h : Bundle.of α = Bundle.of α') (x : α)
     (x' : α') (hx : HEq x x') : (addTwice x = x) = (addTwice x' = x') := by
   cases h; cases hx; rfl
+
+/-! After a `@[dsimp_congr]` theorem applies without progress, `dsimp` still visits the arguments. -/
+
+def gNP (a : Nat) (b : Vector Nat a) (c : Nat) : Nat := b.toList.length + c
+
+@[dsimp_congr]
+theorem gNP_congr (a : Nat) (b : Vector Nat a) (a' : Nat) (b' : Vector Nat a')
+    (h : VectorPack.mk a b = VectorPack.mk a' b') (c : Nat) : gNP a b c = gNP a' b' c := by
+  cases h; rfl
+
+example (v : Vector Nat n) (c r : Nat) (hr : gNP n v c = r) : gNP n v (id c) = r := by
+  dsimp only [id]
+  guard_target =ₛ gNP n v c = r
+  exact hr
