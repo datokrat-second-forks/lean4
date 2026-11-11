@@ -987,14 +987,13 @@ def processCongrHypothesis (h : Expr) (hType : Expr) : SimpM Bool := do
       return r.proof?.isSome || (xs.size > 0 && lhs != r.expr)
 
 /--
-Records `e`, the result of a pack congruence theorem, as simplified, so that `simp` does not visit it
-again (and match the theorem again) unless a post-lemma rewrites it (compare
-`simp.congrView.markResult`).
+Records `e` as the result of a pack congruence theorem, so that `simp` does not try the pack
+congruence theorems on it again. The post-lemmas still run on `e` wherever it occurs.
 -/
 def markSimplified (e : Expr) : SimpM Unit := do
   -- Results inside pack values are not results of `simp` on the same terms elsewhere.
   if (← getConfig).memoize && !(← packOld 2) && !(← get).inPackValue then
-    modify fun s => { s with cache := s.cache.insert e { expr := e } }
+    modify fun s => { s with packCongrDone := s.packCongrDone.insert e }
 
 /--
 Whether every instance argument in the right-hand side of the congruence theorem `declName` has its
@@ -1314,9 +1313,10 @@ def congrCore (e : Expr) : SimpM Result := do
     -- Pack congruence theorems come first: their index already checked the left-hand side.
     let packs : NameSet := ((← get).packCongrIndex[(f.constName!, false)]?.map (·.2)).getD {}
     let (packCs, otherCs) := cs.partition (packs.contains ·.theoremName)
-    for c in packCs do
-      if let some r ← trySimpCongrTheorem? c e then return r
-    if let some r ← dsimpCongrInSimp? e all then return r
+    unless (← get).packCongrDone.contains e do
+      for c in packCs do
+        if let some r ← trySimpCongrTheorem? c e then return r
+      if let some r ← dsimpCongrInSimp? e all then return r
     for c in otherCs do
       if let some r ← trySimpCongrTheorem? c e then return r
     congrDefault e
@@ -1370,6 +1370,24 @@ def withInPackValue (x : SimpM α) : SimpM α := do
   modify fun s => { s with inPackValue := true }
   try x finally modify fun s => { s with inPackValue := saved }
 
+/--
+Rewrites the fields of the pack value `v` one by one, skipping instances, and keeps the rewrites
+that preserve the types of the instance fields. This is what `dsimp` does to arguments without a
+pack congruence theorem, so a pack that no lens covers is simplified as before.
+-/
+def plainPackStep? (v : Expr) : SimpM (Option Expr) := do
+  let args := v.getAppArgs
+  let infos := (← getFunInfoNArgs v.getAppFn args.size).paramInfo
+  let mut args' := args
+  for h : i in *...args.size do
+    if infos[i]?.any (·.isInstance) then continue
+    args' := args'.set! i (← dsimp args[i])
+  if args' == args then return none
+  let mut v' := mkAppN v.getAppFn args'
+  if backward.dsimp.instanceTypes.get (← getOptions) then
+    v' ← revertInstanceTypeChanges v v'
+  return if v' == v then none else some v'
+
 set_option compiler.ignoreBorrowAnnotation true in
 @[export lean_simp_pack_value]
 partial def simpPackValueImpl (v : Expr) : SimpM Result := do
@@ -1384,6 +1402,7 @@ where
     let mut step? ← congrStep? v
     if step?.isNone then step? ← fieldsStep? v
     if step?.isNone then step? ← rewritePackRoot? v false
+    if step?.isNone then step? ← (·.map ({ expr := · })) <$> plainPackStep? v
     let some r := step? | return acc
     if r.expr == v then return acc
     loop (← acc.mkEqTrans r) (i + 1)
@@ -1421,6 +1440,7 @@ where
     let mut step? ← congrStep? v
     if step?.isNone then step? ← fieldsStep? v
     if step?.isNone then step? ← (·.map (·.expr)) <$> rewritePackRoot? v true
+    if step?.isNone then step? ← plainPackStep? v
     let some v' := step? | return v
     if v' == v then return v
     loop v' (i + 1)

@@ -297,6 +297,8 @@ structure State where
   packValueDCache : Std.HashMap Expr Expr := {}
   /-- Pairs of a pack congruence theorem and a term whose left-hand side does not match it. -/
   packCongrFailures : Std.HashSet (Name × Expr) := {}
+  /-- Results of pack congruence theorems: `simp` does not try these theorems on them again. -/
+  packCongrDone : Std.HashSet Expr := {}
 
 structure Stats where
   usedTheorems : UsedSimps := {}

@@ -277,3 +277,17 @@ example (v : Vector Nat n) (c r : Nat) (hr : gNP n v c = r) : gNP n v (id c) = r
   dsimp only [id]
   guard_target =ₛ gNP n v c = r
   exact hr
+
+/-! Without a lens for the pack, `dsimp` still rewrites the fields of the pack one by one. -/
+
+example (v : Vector Nat (id n)) (c r : Nat) (hr : gNP n v c = r) : gNP (id n) v c = r := by
+  dsimp only [id]
+  guard_target =ₛ gNP n v c = r
+  exact hr
+
+/-! `simp` runs the post-lemmas on each occurrence of the result of a pack congruence theorem. -/
+
+theorem f_def (a : Nat) (b : Vector Nat a) (c : Nat) : f a b c = b.toList.length + c := rfl
+
+example (v : Vector Nat n) (c : Nat) : f n v (0 + c) = f n v c := by
+  simp only [Nat.zero_add, f_def]
