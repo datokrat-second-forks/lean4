@@ -867,6 +867,21 @@ private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode :=
       let l' ← if trailing.contains r.mvarId! || (simpMode && proofHEq) then pure l else dsimp l
       r.mvarId!.assign l'
       modified := modified || l' != l
+    else if hType.isForall then
+      -- A pack hypothesis under binders: simplify the pack with the bound variables in the context.
+      let some m ← forallTelescope hType fun ys body => do
+          let some (l, r) := body.eqOrIff? | return none
+          let some (ci, us, rArgs) ← packCtorApp? r | return none
+          let v ← packEtaM (← instantiateMVars l)
+          let v' ← if simp.packCongr.ctorOnly.get (← getOptions) && (← packCtorApp? v).isSome then
+              dsimpPackValue v
+            else withPackCtorGuard <| dsimp v
+          let vals ← packFields ci us (rArgs.extract 0 ci.numParams) v'
+          for m in rArgs.extract ci.numParams rArgs.size, val in vals do
+            m.getAppFn.mvarId!.assign (← mkLambdaFVars ys val)
+          return some (v' != v)
+        | return none
+      modified := modified || m
     else if let some (l, r) := hType.eqOrIff? then
       let l ← instantiateMVars l
       let r ← instantiateMVars r

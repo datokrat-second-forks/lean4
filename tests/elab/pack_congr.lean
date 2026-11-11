@@ -325,3 +325,44 @@ example (Q : Nat → Prop) (hp : ∀ n, 0 < succ' n) (n : Nat) (h : Q (n + 1)) :
     Q ((NatMap.mk (fun n => succ' n) hp).toFun n) := by
   simp only [succ', NatMap.toFun_mk]
   exact h
+
+/-!
+A pack hypothesis under a binder: the pack of a family of types with a family of instances.
+-/
+
+class Zer (α : Type) where
+  zer : α
+
+structure ZerPack where
+  α : Type
+  [inst : Zer α]
+
+instance Zer.pi {ι : Type} {f : ι → Type} [∀ i, Zer (f i)] : Zer (∀ i, f i) := ⟨fun _ => Zer.zer⟩
+
+def zerTag (α : Type) [Zer α] : Nat := 0
+
+def NatAlias : Type := Nat
+instance : Zer NatAlias := ⟨(0 : Nat)⟩
+instance : Zer Nat := ⟨0⟩
+
+@[dsimp_congr]
+theorem zerTag_congr {α α' : Type} [Zer α] [Zer α'] (h : ZerPack.mk α = ZerPack.mk α') :
+    zerTag α = zerTag α' := by
+  cases h; rfl
+
+@[simp]
+theorem NatAlias.zerPack : ZerPack.mk NatAlias = ZerPack.mk Nat := rfl
+
+@[dsimp_congr]
+theorem Zer.pi.packLens {ι : Type} {f f' : ι → Type} [i : ∀ a, Zer (f a)] [i' : ∀ a, Zer (f' a)]
+    (h : ∀ a, @ZerPack.mk (f a) (i a) = @ZerPack.mk (f' a) (i' a)) :
+    @ZerPack.mk (∀ a, f a) Zer.pi = @ZerPack.mk (∀ a, f' a) Zer.pi := by
+  have : f = f' := funext fun a => congrArg ZerPack.α (h a)
+  subst this
+  have : i = i' := funext fun a => by injection h a
+  subst this; rfl
+
+example (P : Nat → Prop) (h : P (zerTag (Bool → Nat))) : P (zerTag (Bool → NatAlias)) := by
+  dsimp only [NatAlias.zerPack]
+  guard_target =ₛ P (zerTag (Bool → Nat))
+  exact h

@@ -111,13 +111,15 @@ Whether the hypothesis type `hType` of a congruence theorem is a pack hypothesis
 `mkSimpCongrTheorem`).
 -/
 def isPackHypothesis (hType : Expr) : Bool :=
+  let hType := hType.getForallBody
   hType.isEq && !hType.appArg!.getAppFn.isMVar
 
 /--
 Checks the congruence theorem `declName`. Besides the hypotheses `a = a'` described at `congr`, it may
 have *pack hypotheses* `p = S.mk ps fs'`, where `S` is a structure that is not a class, the parameters
 `fs'` are new, and `p` is a value of `S`, typically `S.mk ps fs` for arguments `fs` that depend on
-each other. If `allowHEq` holds (for `dsimp_congr`), it may also have hypotheses `HEq a a'` for new
+each other. A pack hypothesis of a `dsimp_congr` theorem may be under binders,
+`∀ ys, p = S.mk ps (fs' ys)`, for packs of families. If `allowHEq` holds (for `dsimp_congr`), it may also have hypotheses `HEq a a'` for new
 parameters `a'`, and the conclusion may be `HEq lhs rhs`.
 -/
 def mkSimpCongrTheorem (declName : Name) (prio : Nat) (allowHEq := false) :
@@ -158,12 +160,15 @@ def mkSimpCongrTheorem (declName : Name) (prio : Nat) (allowHEq := false) :
                 if let some (ci, _, rArgs) ← packCtorApp? xRhs then
                   let params := rArgs.extract 0 ci.numParams
                   let fields := rArgs.extract ci.numParams rArgs.size
-                  unless ys.isEmpty && onlyMVarsAt xLhs foundMVars &&
+                  -- Under binders `ys` (`dsimp_congr` only), each new parameter is applied to `ys`.
+                  let heads := fields.map (·.getAppFn)
+                  unless (ys.isEmpty || allowHEq) && fields.all (·.getAppArgs == ys) &&
+                      onlyMVarsAt xLhs foundMVars &&
                       params.all (onlyMVarsAt · foundMVars) &&
-                      fields.all (fun f => f.isMVar && !foundMVars.contains f.mvarId!) &&
-                      (fields.map (·.mvarId!)).toList.eraseDups.length == fields.size do
+                      heads.all (fun f => f.isMVar && !foundMVars.contains f.mvarId!) &&
+                      (heads.map (·.mvarId!)).toList.eraseDups.length == fields.size do
                     throwError "Invalid `congr` theorem: Parameter #{i+1} is not a valid pack hypothesis, which must have the form `p = S.mk ps fs'` with new parameters `fs'`{indentExpr xType}"
-                  return some (fields.map (·.mvarId!), true)
+                  return some (heads.map (·.mvarId!), true)
               let mut j : Nat := 0
               for y in ys do
                 let yType ← inferType y
@@ -255,8 +260,8 @@ builtin_initialize dsimpCongrExtension : SimpleScopedEnvExtension SimpCongrTheor
   }
 
 /--
-Checks that `declName` is a congruence theorem (see `mkSimpCongrTheorem`) whose hypotheses have no
-binders and whose right-hand side becomes the left-hand side when every hypothesis is instantiated by
+Checks that `declName` is a congruence theorem (see `mkSimpCongrTheorem`) whose hypotheses, except
+pack hypotheses, have no binders and whose right-hand side becomes the left-hand side when every hypothesis is instantiated by
 reflexivity, that is, when the new parameters are instantiated with the corresponding parts of the
 left-hand sides of the hypotheses.
 -/
@@ -270,6 +275,13 @@ def mkDSimpCongrTheorem (declName : Name) (prio : Nat) : MetaM SimpCongrTheorem 
     let hType ← instantiateMVars (← inferType xs[i]!)
     if let some (_, l, _, r) := hType.heq? then
       r.mvarId!.assign l
+    else if hType.isForall && isPackHypothesis hType then
+      forallTelescope hType fun ys body => do
+        let some (l, r) := body.eqOrIff? | unreachable!
+        let some (ci, us, rArgs) ← packCtorApp? r | unreachable!
+        let vals ← packFields ci us (rArgs.extract 0 ci.numParams) l
+        for m in rArgs.extract ci.numParams rArgs.size, v in vals do
+          m.getAppFn.mvarId!.assign (← mkLambdaFVars ys v)
     else if let some (l, r) := hType.eqOrIff? then
       if r.isMVar then
         r.mvarId!.assign l
