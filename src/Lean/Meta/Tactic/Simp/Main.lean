@@ -810,7 +810,7 @@ side are not dsimped but left to `simp`, together with the arguments of `e` beyo
 side; the second component is the number of these trailing arguments.
 -/
 private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode := false) :
-    SimpM (Option (Expr × Nat)) := withNewMCtxDepth do
+    SimpM (Option (Expr × Nat × Bool)) := withNewMCtxDepth do
   let h0 ← IO.getNumHeartbeats
   let mode := if simpMode then "simp" else "dsimp"
   let thmShort := c.theoremName.getString!
@@ -822,8 +822,8 @@ private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode :=
   let heqOuts ← c.hypothesesPos.filterMapM fun i => do
     return (← inferType xs[i]!).heq?.bind fun (_, _, _, r) => if r.isMVar then some r.mvarId! else none
   let rhsArgs := rhs.getAppArgs
-  -- With a proof among the `HEq` hypotheses, ordinary congruence cannot rewrite the trailing
-  -- arguments: the type of the proof depends on them.
+  -- With a proof among the `HEq` hypotheses, `simp` only rewrites the packs here and leaves the other
+  -- arguments to its default congruence, which casts the proof (third component of the result).
   let proofHEq ← c.hypothesesPos.anyM fun i => do
     let some (_, l, _, _) := (← inferType xs[i]!).heq? | return false
     isProof l
@@ -864,7 +864,7 @@ private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode :=
         let l := if l.isAppOfArity ``id 2 then l.appArg! else l
         r.mvarId!.assign (← if (← inferType l) == rType then pure l else mkExpectedTypeHint l rType)
         continue
-      let l' ← if trailing.contains r.mvarId! then pure l else dsimp l
+      let l' ← if trailing.contains r.mvarId! || (simpMode && proofHEq) then pure l else dsimp l
       r.mvarId!.assign l'
       modified := modified || l' != l
     else if let some (l, r) := hType.eqOrIff? then
@@ -902,8 +902,8 @@ private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode :=
     trace[Meta.Tactic.simp.congr] "dsimp_congr {c.theoremName}{indentExpr e}\n==>{indentExpr eNew}"
   recordPackStat s!"{mode} {thmShort} finish {modified}" ((← IO.getNumHeartbeats) - h2)
   if simpMode then
-    return some (mkAppN eNew extraArgs, numTrailing + extraArgs.size)
-  return some (mkAppN eNew (← extraArgs.mapM dsimp), 0)
+    return some (mkAppN eNew extraArgs, numTrailing + extraArgs.size, proofHEq)
+  return some (mkAppN eNew (← extraArgs.mapM dsimp), 0, false)
 
 /--
 Applies `@[dsimp_congr]` theorems at the head of `e`. A theorem that applies replaces the visit of
@@ -1308,11 +1308,13 @@ def dsimpCongrInSimp? (e : Expr) (skip : List SimpCongrTheorem) : SimpM (Option 
     if skip.any (·.theoremName == c.theoremName) then continue
     if ctorOnly && (← packValueOnlyTheorem c) then continue
     let hb ← IO.getNumHeartbeats
-    let some (eNew, n) ← tryDSimpCongrTheorem? c e (simpMode := true) | continue
+    let some (eNew, n, viaDefault) ← tryDSimpCongrTheorem? c e (simpMode := true) | continue
     let args := eNew.getAppArgs
     let k := args.size - n
     let hA ← IO.getNumHeartbeats
-    let r ← congrArgs { expr := mkAppN eNew.getAppFn (args.extract 0 k) } (args.extract k args.size)
+    let r ← if viaDefault then
+        if eNew == e then pure { expr := e } else congrDefault eNew
+      else congrArgs { expr := mkAppN eNew.getAppFn (args.extract 0 k) } (args.extract k args.size)
     recordPackStat s!"simp {c.theoremName.getString!} trailingArgs" ((← IO.getNumHeartbeats) - hA)
     trace[Debug.Meta.Tactic.simp.congrCost] "simp-dsimp_congr {c.theoremName} {(← IO.getNumHeartbeats) - hb} true {r.expr != e}"
     if r.expr == e then
@@ -1471,7 +1473,7 @@ where
     let thms := (← getDSimpCongrTheorems).get fName
     if thms.isEmpty then return none
     for c in (← congrCandidates fName true thms v) do
-      if let some (v', _) ← tryDSimpCongrTheorem? c v then
+      if let some (v', _, _) ← tryDSimpCongrTheorem? c v then
         if v' != v then return some v'
     return none
   fieldsStep? (v : Expr) : SimpM (Option Expr) := do
