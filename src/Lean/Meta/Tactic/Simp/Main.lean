@@ -1318,6 +1318,7 @@ def dsimpCongrInSimp? (e : Expr) (skip : List SimpCongrTheorem) : SimpM (Option 
   let thms := (← getDSimpCongrTheorems).get fName
   if thms.isEmpty then return none
   let ctorOnly ← inPackValueOnly e
+  let mut unchanged := false
   for c in (← congrCandidates fName true thms e) do
     -- `simp` applies theorems that are also `@[congr]` theorems with proofs instead.
     if skip.any (·.theoremName == c.theoremName) then continue
@@ -1333,13 +1334,16 @@ def dsimpCongrInSimp? (e : Expr) (skip : List SimpCongrTheorem) : SimpM (Option 
     recordPackStat s!"simp {c.theoremName.getString!} trailingArgs" ((← IO.getNumHeartbeats) - hA)
     trace[Debug.Meta.Tactic.simp.congrCost] "simp-dsimp_congr {c.theoremName} {(← IO.getNumHeartbeats) - hb} true {r.expr != e}"
     if r.expr == e then
-      if debug.simp.packCongr.fallback.get (← getOptions) then return none
-      return some { expr := e }
+      -- Another theorem for the same head can still change the term.
+      unchanged := true
+      continue
     let consistent ← packCongrConsistent c.theoremName
     modify fun s => { s with congrResultConsistent := consistent }
     markSimplified r.expr
     let proof? ← r.proof?.mapM fun h => do mkExpectedTypeHint h (← mkEq e r.expr)
     return some { r with proof? }
+  if unchanged && !debug.simp.packCongr.fallback.get (← getOptions) then
+    return some { expr := e }
   return none
 
 def congrCore (e : Expr) : SimpM Result := do

@@ -366,3 +366,28 @@ example (P : Nat → Prop) (h : P (zerTag (Bool → Nat))) : P (zerTag (Bool →
   dsimp only [NatAlias.zerPack]
   guard_target =ₛ P (zerTag (Bool → Nat))
   exact h
+
+/-!
+Two pack congruence theorems for one head: `simp` tries the second one when the first one applies
+without a change.
+-/
+
+def zerTag₂ (α β : Type) [Zer α] [Zer β] : Nat := 0
+
+@[dsimp_congr]
+theorem zerTag₂_congr_left {α α' β : Type} [Zer α] [Zer α'] [Zer β]
+    (h : ZerPack.mk α = ZerPack.mk α') : zerTag₂ α β = zerTag₂ α' β := by
+  cases h; rfl
+
+@[dsimp_congr]
+theorem zerTag₂_congr_right {α β β' : Type} [Zer α] [Zer β] [Zer β']
+    (h : ZerPack.mk β = ZerPack.mk β') : zerTag₂ α β = zerTag₂ α β' := by
+  cases h; rfl
+
+example (P : Nat → Prop) (h : P (zerTag₂ Nat Nat)) : P (zerTag₂ Nat NatAlias) := by
+  simp only [NatAlias.zerPack]
+  exact h
+
+example (P : Nat → Prop) (h : P (zerTag₂ Nat Nat)) : P (zerTag₂ NatAlias Nat) := by
+  simp only [NatAlias.zerPack]
+  exact h
