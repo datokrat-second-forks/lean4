@@ -4,8 +4,8 @@ public import Module.PackCongrBase
 import Module.PackCongrPriv
 
 /-!
-`dsimp` finds `@[dsimp_congr]` theorems of privately imported modules. In a public signature, such
-a theorem is not accessible, and `dsimp` must still be able to use it.
+`dsimp` uses the `@[dsimp_congr]` theorems of a privately imported module in the private scope only.
+In a public signature, such a theorem is not accessible, and `dsimp` skips it without an error.
 -/
 
 public theorem packLen_public (n : Nat) (v : Vector Nat n) :

@@ -667,12 +667,15 @@ where
     withNewMCtxDepth <| withExactInstancesConfig <| isDefEqGuarded type d
 
 /--
-Instantiates the congruence theorem `declName` and returns it with its type. The lookup also finds
-theorems of privately imported modules while the current context is an exporting one.
+Instantiates the congruence theorem `declName` and returns it with its type. Returns `none` if the
+current scope cannot access the theorem: as with instances, a theorem of a privately imported module
+is not used in a public signature.
 -/
-def mkCongrTheoremConst (declName : Name) : MetaM (Expr × Expr) := withoutExporting do
+def mkCongrTheoremConst? (declName : Name) : MetaM (Option (Expr × Expr)) := do
+  let env ← getEnv
+  if env.isExporting && !env.contains declName then return none
   let thm ← mkConstWithFreshMVarLevels declName
-  return (thm, ← inferType thm)
+  return some (thm, ← inferType thm)
 
 /--
 Returns the pack congruence theorems among `thms` (those with a pack or `HEq` hypothesis or an
@@ -687,7 +690,8 @@ def getPackCongrIndex (fName : Name) (dsimp : Bool) (thms : List SimpCongrTheore
   let mut packs : NameSet := {}
   for c in thms do
     let keys? ← withNewMCtxDepth do
-      let (xs, _, type) ← forallMetaTelescopeReducing (← mkCongrTheoremConst c.theoremName).2
+      let some (_, thmType) ← mkCongrTheoremConst? c.theoremName | return none
+      let (xs, _, type) ← forallMetaTelescopeReducing thmType
       let isPack ← pure type.isHEq <||> c.hypothesesPos.anyM fun i => do
         let t ← inferType xs[i]!
         return isPackHypothesis t || t.isHEq
@@ -772,7 +776,7 @@ restricted; a theorem with an `HEq` conclusion about a structure constructor, e.
 is an ordinary congruence.
 -/
 def packValueOnlyTheorem (c : SimpCongrTheorem) : MetaM Bool := do
-  let (_, type) ← mkCongrTheoremConst c.theoremName
+  let some (_, type) ← mkCongrTheoremConst? c.theoremName | return false
   forallTelescopeReducing type fun _ concl => return concl.isEq
 
 /--
@@ -810,7 +814,7 @@ private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode :=
   let h0 ← IO.getNumHeartbeats
   let mode := if simpMode then "simp" else "dsimp"
   let thmShort := c.theoremName.getString!
-  let (_, thmType) ← mkCongrTheoremConst c.theoremName
+  let some (_, thmType) ← mkCongrTheoremConst? c.theoremName | return none
   let (xs, bis, type) ← forallMetaTelescopeReducing thmType
   let some (lhs, rhs) := type.eqOrIff? <|> type.heq?.map fun (_, lhs, _, rhs) => (lhs, rhs)
     | return none
@@ -1068,7 +1072,7 @@ def processPackCongrHypothesis? (h hType : Expr) (defeq := true) : SimpM (Option
 def trySimpCongrTheoremCore? (c : SimpCongrTheorem) (e : Expr) : SimpM (Option Result) := withNewMCtxDepth do withParent e do
   recordCongrTheorem c.theoremName
   trace[Debug.Meta.Tactic.simp.congr] "{c.theoremName}, {e}"
-  let (thm, thmType) ← mkCongrTheoremConst c.theoremName
+  let some (thm, thmType) ← mkCongrTheoremConst? c.theoremName | return none
   let thmHasBinderNameHint := thmType.hasBinderNameHint
   let (xs, bis, type) ← forallMetaTelescopeReducing thmType
   if c.hypothesesPos.any (· ≥ xs.size) then
@@ -1241,12 +1245,12 @@ where
         for (i, p) in v.dataPos do
           vals? := vals?.set! i (some fnArgs[p]!)
         let some vals := vals?.mapM id | return none
-        let type ← instantiateForall (← withoutExporting <| inferType thm) vals
+        let type ← instantiateForall (← inferType thm) vals
         let some (_, _, rhs) := type.eq? | return none
         trace[Debug.Meta.Tactic.simp.congrView] "{.ofConstName v.theoremName}: cached instantiation"
         return some rhs
     let some (rhs, thm, vals) ← withNewMCtxDepth do
-        let (thm, thmType) ← mkCongrTheoremConst v.theoremName
+        let some (thm, thmType) ← mkCongrTheoremConst? v.theoremName | return none
         let (xs, bis, type) ← forallMetaTelescope thmType
         let some (_, lhs, rhs) := type.eq? | return none
         if simp.congrView.unifyInstances.get (← getOptions) then
