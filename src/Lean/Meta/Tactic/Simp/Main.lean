@@ -822,7 +822,12 @@ private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode :=
   let heqOuts ← c.hypothesesPos.filterMapM fun i => do
     return (← inferType xs[i]!).heq?.bind fun (_, _, _, r) => if r.isMVar then some r.mvarId! else none
   let rhsArgs := rhs.getAppArgs
-  let numTrailing := if simpMode then
+  -- With a proof among the `HEq` hypotheses, ordinary congruence cannot rewrite the trailing
+  -- arguments: the type of the proof depends on them.
+  let proofHEq ← c.hypothesesPos.anyM fun i => do
+    let some (_, l, _, _) := (← inferType xs[i]!).heq? | return false
+    isProof l
+  let numTrailing := if simpMode && !proofHEq then
     (rhsArgs.reverse.toList.takeWhile fun a => a.isMVar && heqOuts.contains a.mvarId!).length else 0
   let trailing := rhsArgs.extract (rhsArgs.size - numTrailing) rhsArgs.size |>.map (·.mvarId!)
   let numArgs := lhs.getAppNumArgs
@@ -853,6 +858,12 @@ private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode :=
     if let some (_, l, _, r) := hType.heq? then
       let l ← instantiateMVars l
       let r ← instantiateMVars r
+      if (← isProof l) then
+        -- A proof keeps its value. Its type follows the arguments that were rewritten before it.
+        let rType ← instantiateMVars (← inferType r)
+        let l := if l.isAppOfArity ``id 2 then l.appArg! else l
+        r.mvarId!.assign (← if (← inferType l) == rType then pure l else mkExpectedTypeHint l rType)
+        continue
       let l' ← if trailing.contains r.mvarId! then pure l else dsimp l
       r.mvarId!.assign l'
       modified := modified || l' != l

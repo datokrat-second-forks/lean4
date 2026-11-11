@@ -291,3 +291,37 @@ theorem f_def (a : Nat) (b : Vector Nat a) (c : Nat) : f a b c = b.toList.length
 
 example (v : Vector Nat n) (c : Nat) : f n v (0 + c) = f n v c := by
   simp only [Nat.zero_add, f_def]
+
+/-!
+A constructor with a proof field. The `HEq` hypothesis for the proof keeps the proof and gives it
+the type that mentions the rewritten function, so that a lemma about the constructor still unifies.
+-/
+
+structure NatMap where
+  toFun : Nat → Nat
+  pos : ∀ n, 0 < toFun n
+
+structure FunPack where
+  f : Nat → Nat
+
+@[dsimp_congr]
+theorem NatMap.mk_congr (f f' : Nat → Nat) (h : FunPack.mk f = FunPack.mk f') (hp : ∀ n, 0 < f n)
+    (hp' : ∀ n, 0 < f' n) (hh : HEq hp hp') : HEq (NatMap.mk f hp) (NatMap.mk f' hp') := by
+  cases h; rfl
+
+def succ' (n : Nat) : Nat := n + 1
+
+example (P : NatMap → Prop) (hp : ∀ n, 0 < succ' n) (hp' : ∀ n, 0 < n + 1)
+    (h : P (NatMap.mk (fun n => n + 1) hp')) : P (NatMap.mk (fun n => succ' n) hp) := by
+  dsimp only [succ']
+  guard_target =ₛ P (NatMap.mk (fun n => n + 1) (id hp))
+  exact h
+
+-- `simp` rewrites the function definitionally, too, and the lemma about the constructor unifies.
+theorem NatMap.toFun_mk (f : Nat → Nat) (hp : ∀ n, 0 < f n) (n : Nat) : (NatMap.mk f hp).toFun n = f n :=
+  rfl
+
+example (Q : Nat → Prop) (hp : ∀ n, 0 < succ' n) (n : Nat) (h : Q (n + 1)) :
+    Q ((NatMap.mk (fun n => succ' n) hp).toFun n) := by
+  simp only [succ', NatMap.toFun_mk]
+  exact h
