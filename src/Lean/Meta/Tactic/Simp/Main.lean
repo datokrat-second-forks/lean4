@@ -1426,12 +1426,18 @@ def plainPackStep? (v : Expr) : SimpM (Option Expr) := do
   let infos := (← getFunInfoNArgs v.getAppFn args.size).paramInfo
   let mut args' := args
   for h : i in *...args.size do
-    if infos[i]?.any (·.isInstance) then continue
+    if infos[i]?.any (fun info => info.isInstance || info.binderInfo.isInstImplicit) then continue
     args' := args'.set! i (← dsimp args[i])
   if args' == args then return none
   let mut v' := mkAppN v.getAppFn args'
   if backward.dsimp.instanceTypes.get (← getOptions) then
     v' ← revertInstanceTypeChanges v v'
+  -- A field `[inst : c α]` over a class variable `c` is not an instance for `FunInfo`.
+  let fType ← inferType v'.getAppFn
+  let newArgs := v'.getAppArgs
+  for h : j in *...infos.size do
+    if infos[j].binderInfo.isInstImplicit && !infos[j].isInstance then
+      unless (← revertInstanceTypeChanges.hasExpectedType fType newArgs j) do return none
   return if v' == v then none else some v'
 
 set_option compiler.ignoreBorrowAnnotation true in

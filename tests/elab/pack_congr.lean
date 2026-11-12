@@ -434,3 +434,24 @@ example (P : Nat → Prop) (h : P (zerTagP Nat NatAlias₂ trivial)) :
   simp only [NatAlias.zerPack, natAlias₂_eq]
   guard_target =ₛ P (zerTagP Nat NatAlias₂ trivial)
   exact h
+
+/-!
+A pack over a class variable: the field `[inst : c α]` is an instance although its type is not
+syntactically a class. `simp` does not rewrite the carrier alone.
+-/
+
+structure CPack (c : Type → Type) where
+  α : Type
+  [inst : c α]
+
+def cTag (α : Type) [Zer α] : Nat := 0
+
+@[dsimp_congr]
+theorem cTag_congr {α α' : Type} [i : Zer α] [i' : Zer α']
+    (h : @CPack.mk Zer α i = @CPack.mk Zer α' i') : cTag α = cTag α' := by
+  cases h; rfl
+
+example (P : Nat → Prop) (h : P (cTag NatAlias₂)) : P (cTag NatAlias₂) := by
+  fail_if_success simp only [natAlias₂_eq]
+  fail_if_success dsimp only [natAlias₂_eq]
+  exact h
