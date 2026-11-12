@@ -267,6 +267,12 @@ structure State where
   cache        : Cache := {}
   congrCache   : CongrCache := {}
   dsimpCache   : ExprStructMap Expr := {}
+  /--
+  The `dsimp` caches that nested `dsimp` calls share with the outer call: `dsimp` calls itself for
+  the hypotheses of a `@[dsimp_congr]` theorem. The second cache is for the simplification of a pack
+  value (see `inPackValue`), where other methods are in effect.
+  -/
+  dsimpCacheRefs? : Option (IO.Ref (ExprStructMap Expr) × IO.Ref (ExprStructMap Expr)) := none
   usedTheorems : UsedSimps := {}
   numSteps     : Nat := 0
   diag         : Diagnostics := {}

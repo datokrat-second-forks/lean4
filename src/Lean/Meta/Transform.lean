@@ -95,19 +95,19 @@ The `skipInstances` flag is used by `dsimp` to avoid rewriting instances.
 
 **Warnings:**
 - The cache is only valid when using the same `pre` and `post` functions.
-- Ensure there are no other references to `cache` to avoid unnecessary hash map copying.
+- The cache is a reference, so that a traversal that `pre` or `post` starts can share it.
 -/
 @[inline]
-partial def transformWithCache {m} [Monad m] [MonadLiftT MetaM m] [MonadControlT MetaM m]
+partial def transformWithCacheRef {m} [Monad m] [MonadLiftT MetaM m] [MonadControlT MetaM m]
     (input : Expr)
-    (cache : Std.HashMap ExprStructEq Expr)
+    (cacheRef : IO.Ref (Std.HashMap ExprStructEq Expr))
     (pre   : Expr → m TransformStep := fun _ => return .continue)
     (post  : Expr → m TransformStep := fun e => return .done e)
     (usedLetOnly := false)
     (skipConstInApp := false)
     (skipInstances := false)
     (postApp : Expr → Expr → m Expr := fun _ e => pure e)
-    : m (Expr × Std.HashMap ExprStructEq Expr) :=
+    : m Expr :=
   let _ : STWorld IO.RealWorld m := ⟨⟩
   let _ : MonadLiftT (ST IO.RealWorld) m := { monadLift := fun x => liftM (m := MetaM) (liftM (m := ST IO.RealWorld) x) }
   let rec visit (e : Expr) : MonadCacheT ExprStructEq Expr m Expr :=
@@ -167,7 +167,26 @@ partial def transformWithCache {m} [Monad m] [MonadLiftT MetaM m] [MonadControlT
         | .mdata _ b     => visitPost (e.updateMData! (← visit b))
         | .proj _ _ b    => visitPost (e.updateProj! (← visit b))
         | _              => visitPost e
-  StateRefT'.run (visit input) cache
+  visit input cacheRef
+
+/--
+Variant of `transformWithCacheRef` that takes the cache as a value and returns the new cache.
+Ensure there are no other references to `cache` to avoid unnecessary hash map copying.
+-/
+@[inline]
+def transformWithCache {m} [Monad m] [MonadLiftT MetaM m] [MonadControlT MetaM m]
+    (input : Expr)
+    (cache : Std.HashMap ExprStructEq Expr)
+    (pre   : Expr → m TransformStep := fun _ => return .continue)
+    (post  : Expr → m TransformStep := fun e => return .done e)
+    (usedLetOnly := false)
+    (skipConstInApp := false)
+    (skipInstances := false)
+    (postApp : Expr → Expr → m Expr := fun _ e => pure e)
+    : m (Expr × Std.HashMap ExprStructEq Expr) := do
+  let cacheRef ← liftM (m := MetaM) (IO.mkRef cache)
+  let r ← transformWithCacheRef input cacheRef pre post usedLetOnly skipConstInApp skipInstances postApp
+  return (r, ← liftM (m := MetaM) cacheRef.get)
 
 /--
 Similar to `Core.transform`, but terms provided to `pre` and `post` do not contain loose bound variables.

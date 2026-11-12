@@ -74,7 +74,8 @@ register_builtin_option debug.simp.packCongr.fallback : Bool := {
 register_builtin_option debug.simp.packCongr.old : Nat := {
     defValue := 0
     descr    := "(simp) DEBUG: bit mask restoring earlier pack congruence behavior: 1 = no index, \
-      2 = no result marking, 4 = no failure cache, 8 = `HEq` progress only with a proof"
+      2 = no result marking, 4 = no failure cache, 8 = `HEq` progress only with a proof, \
+      16 = nested `dsimp` calls do not share the cache of the outer call"
   }
 
 def packOld (bit : Nat) : CoreM Bool := do
@@ -1001,14 +1002,31 @@ private partial def dsimpImplCore (e : Expr) : SimpM Expr := do
   let post := m.dpost >> dsimpReduce
   let pre := m.dpre >> dsimpCongr post >> doNotVisitOfNat >> doNotVisitOfScientific >> doNotVisitCharLit >> doNotVisitProofs
   let checkInstanceTypes := backward.dsimp.instanceTypes.get (← getOptions)
-  withInDSimpWithCache fun cache => do
-    transformWithCache e cache
-      (usedLetOnly := cfg.zeta || cfg.zetaUnused)
-      (skipInstances := !cfg.instances)
-      (pre := pre)
-      (post := post)
-      (postApp := fun orig new =>
-        if checkInstanceTypes then revertInstanceTypeChanges orig new else return new)
+  let postApp : Expr → Expr → SimpM Expr := fun orig new =>
+    if checkInstanceTypes then revertInstanceTypeChanges orig new else return new
+  if (← packOld 16) then
+    withInDSimpWithCache fun cache => do
+      transformWithCache e cache
+        (usedLetOnly := cfg.zeta || cfg.zetaUnused)
+        (skipInstances := !cfg.instances)
+        (pre := pre)
+        (post := post)
+        (postApp := postApp)
+  else
+    let refs ← match (← get).dsimpCacheRefs? with
+      | some refs => pure refs
+      | none =>
+        let refs := (← IO.mkRef {}, ← IO.mkRef {})
+        modify fun s => { s with dsimpCacheRefs? := some refs }
+        pure refs
+    let cacheRef := if (← get).inPackValue then refs.2 else refs.1
+    withInDSimp do
+      transformWithCacheRef e cacheRef
+        (usedLetOnly := cfg.zeta || cfg.zetaUnused)
+        (skipInstances := !cfg.instances)
+        (pre := pre)
+        (post := post)
+        (postApp := postApp)
 
 set_option compiler.ignoreBorrowAnnotation true in
 @[export lean_dsimp]
