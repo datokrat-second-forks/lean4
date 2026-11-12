@@ -781,19 +781,21 @@ def packValueOnlyTheorem (c : SimpCongrTheorem) : MetaM Bool := do
 
 /--
 Assigns the unassigned metavariables of the pattern `p` that occur as arguments of applications with
-the same constant head and arity as in `e`, to the corresponding subterms of `e`. `isDefEq p e` must
-validate the result. Unification alone could assign a metavariable from another occurrence, e.g.
+the same constant head and arity as in `e`, to the corresponding subterms of `e` when the types
+agree. `isDefEq p e` must validate the result. Unification alone could assign a metavariable from another occurrence, e.g.
 `?f := g` (eta-reduced) from `?f b =?= g b`, while `e` has `fun x => g x` at this position.
 -/
 partial def preMatchCongrPattern (p e : Expr) : MetaM Unit := do
   if p.isMVar then
     unless (← p.mvarId!.isAssigned) || p.hasLooseBVars || e.hasLooseBVars do
-      p.mvarId!.assign e
+      -- `isDefEq p e` does not validate the type of a value under a projection: it can unfold both
+      -- sides to the same `Expr.proj`.
+      if (← withAssignableSyntheticOpaque <| isDefEq (← inferType p) (← inferType e)) then
+        p.mvarId!.assign e
   else if p.isApp && e.isApp then
     let pf := p.getAppFn
     let ef := e.getAppFn
-    -- The levels of `pf` are fresh metavariables: unify them, since assigning the arguments below
-    -- skips the type checks that would.
+    -- The levels of `pf` are fresh metavariables: unify them before the arguments.
     if pf.isConst && pf.constName? == ef.constName? && p.getAppNumArgs == e.getAppNumArgs then
       for lp in pf.constLevels!, le in ef.constLevels! do
         discard <| isLevelDefEq lp le

@@ -391,3 +391,23 @@ example (P : Nat → Prop) (h : P (zerTag₂ Nat Nat)) : P (zerTag₂ Nat NatAli
 example (P : Nat → Prop) (h : P (zerTag₂ Nat Nat)) : P (zerTag₂ NatAlias Nat) := by
   simp only [NatAlias.zerPack]
   exact h
+
+/-!
+A pack congruence theorem whose left-hand side repeats a parameter does not apply to a projection
+application with two different arguments at these positions.
+-/
+
+structure Wrap (α β : Type) [Zer α] [Zer β] where
+  val : Nat
+
+instance : Zer Bool := ⟨false⟩
+
+@[dsimp_congr]
+theorem Wrap.val_diag_congr {α α' : Type} [Zer α] [Zer α'] (h : ZerPack.mk α = ZerPack.mk α')
+    (w : Wrap α α) (w' : Wrap α' α') (hw : HEq w w') : w.val = w'.val := by
+  cases h; cases hw; rfl
+
+example (P : Nat → Prop) (w : Wrap NatAlias Bool) (h : P w.val) : P w.val := by
+  fail_if_success simp only [NatAlias.zerPack]
+  fail_if_success dsimp only [NatAlias.zerPack]
+  exact h
