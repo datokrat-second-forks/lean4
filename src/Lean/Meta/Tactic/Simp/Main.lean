@@ -1339,7 +1339,8 @@ def dsimpCongrInSimp? (e : Expr) (skip : List SimpCongrTheorem) : SimpM (Option 
       -- Another theorem for the same head can still change the term.
       unchanged := true
       continue
-    let consistent ← packCongrConsistent c.theoremName
+    -- The default congruence can rewrite a type without its instances.
+    let consistent ← pure !viaDefault <&&> packCongrConsistent c.theoremName
     modify fun s => { s with congrResultConsistent := consistent }
     markSimplified r.expr
     let proof? ← r.proof?.mapM fun h => do mkExpectedTypeHint h (← mkEq e r.expr)

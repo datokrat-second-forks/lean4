@@ -411,3 +411,26 @@ example (P : Nat → Prop) (w : Wrap NatAlias Bool) (h : P w.val) : P w.val := b
   fail_if_success simp only [NatAlias.zerPack]
   fail_if_success dsimp only [NatAlias.zerPack]
   exact h
+
+/-!
+A pack congruence theorem with a proof argument: `simp` rewrites the packs and leaves the other
+arguments to its default congruence. The instance type check still runs on that result.
+-/
+
+def zerTagP (α β : Type) [Zer α] [Zer β] (_ : True) : Nat := 0
+
+@[dsimp_congr]
+theorem zerTagP_congr {α α' β β' : Type} [Zer α] [Zer α'] [Zer β] [Zer β']
+    (hα : ZerPack.mk α = ZerPack.mk α') (hβ : ZerPack.mk β = ZerPack.mk β')
+    (hc : True) {hc' : True} (hh : HEq hc hc') : zerTagP α β hc = zerTagP α' β' hc' := by
+  cases hα; cases hβ; rfl
+
+def NatAlias₂ : Type := Nat
+instance : Zer NatAlias₂ := ⟨(1 : Nat)⟩
+theorem natAlias₂_eq : NatAlias₂ = Nat := rfl
+
+example (P : Nat → Prop) (h : P (zerTagP Nat NatAlias₂ trivial)) :
+    P (zerTagP NatAlias NatAlias₂ trivial) := by
+  simp only [NatAlias.zerPack, natAlias₂_eq]
+  guard_target =ₛ P (zerTagP Nat NatAlias₂ trivial)
+  exact h
