@@ -507,6 +507,26 @@ example (P : Nat → Prop) (h : P (@zerTag Nat (@ZerA.toZer Nat _))) :
   exact h
 
 /-!
+A lens whose left-hand side has an instance that is not a parent projection also applies to a pack
+value with another instance that is definitionally equal at instance transparency.
+-/
+
+instance (priority := 0) Zer.pi' {ι : Type} {f : ι → Type} [∀ i, Zer (f i)] : Zer (∀ i, f i) :=
+  ⟨fun _ => Zer.zer⟩
+
+example (P : Nat → Prop) (h : P (zerTag (Bool → Nat))) :
+    P (@zerTag (Bool → NatAlias) Zer.pi') := by
+  dsimp only [NatAlias.zerPack]
+  guard_target =ₛ P (zerTag (Bool → Nat))
+  exact h
+
+example (P : Nat → Prop) (h : P (zerTag (Bool → Nat))) :
+    P (@zerTag (Bool → NatAlias) Zer.pi') := by
+  simp only [NatAlias.zerPack]
+  guard_target =ₛ P (zerTag (Bool → Nat))
+  exact h
+
+/-!
 A pack congruence theorem for an under-applied head: the term has an instance argument after the
 left-hand side of the theorem. The theorem does not rewrite that instance, so the instance type check
 runs on the result and the rewrite of the carrier is reverted.

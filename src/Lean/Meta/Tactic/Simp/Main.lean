@@ -678,11 +678,14 @@ def mkCongrTheoremConst? (declName : Name) : MetaM (Option (Expr × Expr)) := do
   return some (thm, ← inferType thm)
 
 /--
-The term that indexes the left-hand side `e` of a pack congruence theorem. Discrimination trees
-ignore instance arguments, but the lenses of one pack differ only in the instance field of the pack
-value. So for a pack value, the instance fields are added as explicit components of the key.
+The term that indexes a pack value `e`, or the left-hand side `e` of a pack congruence theorem if
+`pattern` is set. Discrimination trees ignore instance arguments, but the lenses for the parent
+projections into one class differ only in the instance field of the pack value. So for a pack value,
+the instance fields are added as explicit components of the key. In a pattern, only an instance
+field that is a projection of a class is kept: another instance can match a different instance
+that is definitionally equal, so it becomes a metavariable.
 -/
-def packIndexTerm (e : Expr) : MetaM Expr := do
+def packIndexTerm (e : Expr) (pattern := false) : MetaM Expr := do
   if (← packCtorApp? e).isNone then return e
   let e ← whnfR e
   let args := e.getAppArgs
@@ -690,7 +693,13 @@ def packIndexTerm (e : Expr) : MetaM Expr := do
   let mut r := e
   for h : i in *...args.size do
     if infos[i]?.any (·.isInstance) then
-      r ← mkAppM ``PProd.mk #[r, args[i]]
+      let mut inst := args[i]
+      if pattern then
+        let isClassProj ← match inst.getAppFn with
+          | .const n _ => pure ((← getProjectionFnInfo? n).any (·.fromClass))
+          | _ => pure false
+        unless isClassProj do inst ← mkFreshExprMVar (← inferType inst)
+      r ← mkAppM ``PProd.mk #[r, inst]
   return r
 
 /--
@@ -713,7 +722,7 @@ def getPackCongrIndex (fName : Name) (dsimp : Bool) (thms : List SimpCongrTheore
         return isPackHypothesis t || t.isHEq
       unless isPack do return none
       let lhs := if type.isHEq then type.appFn!.appFn!.appArg! else type.appFn!.appArg!
-      return some (← withReducible <| DiscrTree.mkPath (← packIndexTerm lhs))
+      return some (← withReducible <| DiscrTree.mkPath (← packIndexTerm lhs (pattern := true)))
     if let some keys := keys? then
       tree := tree.insertKeyValue keys c.theoremName
       packs := packs.insert c.theoremName
@@ -934,11 +943,16 @@ private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode :=
   if modified then
     trace[Meta.Tactic.simp.congr] "dsimp_congr {c.theoremName}{indentExpr e}\n==>{indentExpr eNew}"
   recordPackStat s!"{mode} {thmShort} finish {modified}" ((← IO.getNumHeartbeats) - h2)
-  let mut res := mkAppN eNew (← if simpMode then pure extraArgs else extraArgs.mapM dsimp)
+  let res := mkAppN eNew (← if simpMode then pure extraArgs else extraArgs.mapM dsimp)
   -- The theorem does not cover the arguments after its left-hand side. An instance among them can
   -- depend on an argument that the theorem rewrote.
-  if !extraArgs.isEmpty && backward.dsimp.instanceTypes.get (← getOptions) then
-    res ← revertInstanceTypeChanges e res
+  if modified && !extraArgs.isEmpty && backward.dsimp.instanceTypes.get (← getOptions) then
+    let resArgs := res.getAppArgs
+    let infos := (← getFunInfoNArgs res.getAppFn resArgs.size).paramInfo
+    let fType ← inferType res.getAppFn
+    for j in (resArgs.size - extraArgs.size)...resArgs.size do
+      if infos[j]?.any (fun info => info.isInstance || info.binderInfo.isInstImplicit) then
+        unless (← revertInstanceTypeChanges.hasExpectedType fType resArgs j) do return none
   return some (res, if simpMode then numTrailing + extraArgs.size else 0, simpMode && proofHEq)
 
 /--
