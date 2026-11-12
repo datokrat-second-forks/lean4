@@ -1429,7 +1429,8 @@ Whether the congruence theorem `c` has a hypothesis under binders that is not a 
 such as `∀ x, x ∈ s' → HEq (f x) (f' x)`.
 -/
 def hasBinderHypothesis (c : SimpCongrTheorem) : MetaM Bool := do
-  forallTelescopeReducing (← getConstInfo c.theoremName).type fun xs _ =>
+  let some (_, type) ← mkCongrTheoremConst? c.theoremName | return false
+  forallTelescopeReducing type fun xs _ =>
     c.hypothesesPos.anyM fun i => do
       let t ← inferType xs[i]!
       return t.isForall && !isPackHypothesis t
