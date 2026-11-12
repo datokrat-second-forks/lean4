@@ -455,3 +455,53 @@ example (P : Nat → Prop) (h : P (cTag NatAlias₂)) : P (cTag NatAlias₂) := 
   fail_if_success simp only [natAlias₂_eq]
   fail_if_success dsimp only [natAlias₂_eq]
   exact h
+
+/-!
+Two lenses with the same pack in the conclusion: only the lens whose instance matches the term is
+tried. The instance field of a pack is part of the index key, so `simp` does not try to synthesize
+`ZerB AAlias` for the lens of `ZerB`.
+-/
+
+class ZerA (α : Type) extends Zer α
+class ZerB (α : Type) extends Zer α
+
+structure ZerAPack where
+  α : Type
+  [inst : ZerA α]
+
+structure ZerBPack where
+  α : Type
+  [inst : ZerB α]
+
+@[dsimp_congr]
+theorem ZerA.toZer.packLens {α α' : Type} {i : ZerA α} {i' : ZerA α'}
+    (h : @ZerAPack.mk α i = @ZerAPack.mk α' i') :
+    @ZerPack.mk α (@ZerA.toZer α i) = @ZerPack.mk α' (@ZerA.toZer α' i') := by
+  cases h; rfl
+
+@[dsimp_congr]
+theorem ZerB.toZer.packLens {α α' : Type} {i : ZerB α} {i' : ZerB α'}
+    (h : @ZerBPack.mk α i = @ZerBPack.mk α' i') :
+    @ZerPack.mk α (@ZerB.toZer α i) = @ZerPack.mk α' (@ZerB.toZer α' i') := by
+  cases h; rfl
+
+def AAlias : Type := Nat
+instance AAlias.instZerA : ZerA AAlias := { zer := (0 : Nat) }
+instance Nat.instZerA : ZerA Nat := { zer := 0 }
+
+@[simp]
+theorem AAlias.zerAPack : ZerAPack.mk AAlias = ZerAPack.mk Nat := rfl
+
+#guard_msgs in
+example (P : Nat → Prop) (h : P (@zerTag Nat (@ZerA.toZer Nat _))) :
+    P (@zerTag AAlias (@ZerA.toZer AAlias _)) := by
+  set_option trace.Meta.synthInstance true in
+  simp only [AAlias.zerAPack]
+  exact h
+
+#guard_msgs in
+example (P : Nat → Prop) (h : P (@zerTag Nat (@ZerA.toZer Nat _))) :
+    P (@zerTag AAlias (@ZerA.toZer AAlias _)) := by
+  set_option trace.Meta.synthInstance true in
+  dsimp only [AAlias.zerAPack]
+  exact h

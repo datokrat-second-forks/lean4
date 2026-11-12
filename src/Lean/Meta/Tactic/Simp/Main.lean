@@ -678,6 +678,22 @@ def mkCongrTheoremConst? (declName : Name) : MetaM (Option (Expr × Expr)) := do
   return some (thm, ← inferType thm)
 
 /--
+The term that indexes the left-hand side `e` of a pack congruence theorem. Discrimination trees
+ignore instance arguments, but the lenses of one pack differ only in the instance field of the pack
+value. So for a pack value, the instance fields are added as explicit components of the key.
+-/
+def packIndexTerm (e : Expr) : MetaM Expr := do
+  if (← packCtorApp? e).isNone then return e
+  let e ← whnfR e
+  let args := e.getAppArgs
+  let infos := (← getFunInfoNArgs e.getAppFn args.size).paramInfo
+  let mut r := e
+  for h : i in *...args.size do
+    if infos[i]?.any (·.isInstance) then
+      r ← mkAppM ``PProd.mk #[r, args[i]]
+  return r
+
+/--
 Returns the pack congruence theorems among `thms` (those with a pack or `HEq` hypothesis or an
 `HEq` conclusion) indexed by their left-hand sides, and their names. Only candidates retrieved
 from the index are tried on a term, so that terms that the left-hand side cannot match are rejected
@@ -697,7 +713,7 @@ def getPackCongrIndex (fName : Name) (dsimp : Bool) (thms : List SimpCongrTheore
         return isPackHypothesis t || t.isHEq
       unless isPack do return none
       let lhs := if type.isHEq then type.appFn!.appFn!.appArg! else type.appFn!.appArg!
-      return some (← withReducible <| DiscrTree.mkPath lhs)
+      return some (← withReducible <| DiscrTree.mkPath (← packIndexTerm lhs))
     if let some keys := keys? then
       tree := tree.insertKeyValue keys c.theoremName
       packs := packs.insert c.theoremName
@@ -709,7 +725,7 @@ def congrCandidates (fName : Name) (dsimp : Bool) (thms : List SimpCongrTheorem)
     SimpM (List SimpCongrTheorem) := do
   let (tree, packs) ← getPackCongrIndex fName dsimp thms
   if packs.isEmpty || (← packOld 1) then return thms
-  let found := (← withSimpIndexConfig <| tree.getMatchWithExtra e).map (·.1)
+  let found := (← withSimpIndexConfig <| tree.getMatchWithExtra (← packIndexTerm e)).map (·.1)
   return thms.filter fun c => !packs.contains c.theoremName || found.contains c.theoremName
 
 /--
