@@ -100,3 +100,32 @@ error: Invalid `congr` theorem: Parameter #9 is not a valid `HEq` hypothesis, wh
 axiom lsum_bad {M M' : Type} [i : AddZ M] [i' : AddZ M'] {s : List Nat}
     {f : Nat → M} {f' : Nat → M'} (h : AddZPack.mk M = AddZPack.mk M')
     (hf : ∀ x, HEq (f x) (f' 0)) : HEq (lsum s f) (lsum s f')
+
+/-!
+The new function must not depend on the bound hypothesis. Here `simp` can only simplify the
+condition with `x ∈ s`, and the result has the proof of `x ∈ s` in it. `simp` gives the theorem up.
+-/
+
+/--
+error: `simp` made no progress
+-/
+#guard_msgs in
+example (Q : Nat → Prop) (s : List Nat) (g : { x // x ∈ s } → Nat)
+    (h : Q (lsum s fun x => if h : x ∈ s then g ⟨x, h⟩ else 0)) :
+    Q (lsum s fun x => if h : x ∈ s then g ⟨x, h⟩ else 0) := by
+  simp +contextual only [↓reduceDIte]
+
+/-! A rewrite with `rfl` lemmas only gives a result without a proof, as in `dsimp`. -/
+
+theorem noProof (Q : Nat → Prop) (s : List Nat) (g : Nat → MyNat)
+    (h : Q (lsum (M := Nat) s fun x => g x)) : Q (lsum (M := MyNat) s fun x => g (down (up x))) := by
+  simp only [myNat_pack, down_up]
+  exact h
+
+/--
+info: theorem noProof : ∀ (Q : Nat → Prop) (s : List Nat) (g : Nat → MyNat),
+  Q (lsum s fun x => g x) → Q (lsum s fun x => g (down (up x))) :=
+fun Q s g h => id h
+-/
+#guard_msgs in
+#print noProof

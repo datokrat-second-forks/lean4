@@ -1068,8 +1068,11 @@ def congrDefault (e : Expr) : SimpM Result := do
   else
     withParent e <| simpAppUsingCongr e
 
-/-- Process the given congruence theorem hypothesis. Return true if it made "progress". -/
-def processCongrHypothesis (h : Expr) (hType : Expr) : SimpM Bool := do
+/--
+Process the given congruence theorem hypothesis. Returns whether it made "progress", whether the
+left-hand side changed, and whether the change has a proof.
+-/
+def processCongrHypothesisCore (h : Expr) (hType : Expr) : SimpM (Bool × Bool × Bool) := do
   forallTelescopeReducing hType fun xs hType => withNewLemmas xs do
     let heq := hType.isHEq
     let lhs ← instantiateMVars (if heq then hType.appFn!.appFn!.appArg! else hType.appFn!.appArg!)
@@ -1080,6 +1083,9 @@ def processCongrHypothesis (h : Expr) (hType : Expr) : SimpM Bool := do
       if heq then
         -- The two sides have types that are only definitionally equal after the pack hypotheses, so
         -- unification at the transparency of `simp` would reject the value and the proof.
+        -- Unification would also reject a value that depends on a bound variable outside `zs`.
+        if xs.any fun x => !zs.contains x && val.containsFVar x.fvarId! then
+          throwCongrHypothesisFailed
         -- An argument that is not a lambda keeps its form.
         let rawLhs := (← inferType h).getForallBody.appFn!.appFn!.appArg!
         let isLam := (← instantiateMVars rawLhs.getAppFn).isLambda
@@ -1087,7 +1093,7 @@ def processCongrHypothesis (h : Expr) (hType : Expr) : SimpM Bool := do
         let α ← inferType lhs
         let proof := mkApp4 (mkConst ``heq_of_eq [← getLevel α]) α lhs r.expr (← r.getProof)
         h.mvarId!.assign (← mkLambdaFVars xs (← mkExpectedTypeHint proof (← instantiateMVars hType)))
-        return r.expr != lhs
+        return (r.expr != lhs, r.expr != lhs, r.proof?.isSome)
       unless (← withSimpMetaConfig <| isDefEq m val) do
         throwCongrHypothesisFailed
       let mut proof ← r.getProof
@@ -1112,7 +1118,11 @@ def processCongrHypothesis (h : Expr) (hType : Expr) : SimpM Bool := do
 
           Thus, we have an extra check now if `xs.size > 0`. TODO: refine this test.
       -/
-      return r.proof?.isSome || (xs.size > 0 && lhs != r.expr)
+      return (r.proof?.isSome || (xs.size > 0 && lhs != r.expr), lhs != r.expr, r.proof?.isSome)
+
+/-- Process the given congruence theorem hypothesis. Return true if it made "progress". -/
+def processCongrHypothesis (h : Expr) (hType : Expr) : SimpM Bool :=
+  return (← processCongrHypothesisCore h hType).1
 
 /--
 Records `e` as the result of a pack congruence theorem, so that `simp` does not try the pack
@@ -1247,6 +1257,8 @@ def trySimpCongrTheoremCore? (c : SimpCongrTheorem) (e : Expr) (packsByDSimp := 
   if (← withSimpMetaConfig <| (if pack then withAssignableSyntheticOpaque else id) <| isDefEq lhs' e) then
     let mut modified := false
     let mut defeq := true
+    -- With `packsByDSimp`: whether no hypothesis has a proof, so that the result is definitional.
+    let mut noProof := packsByDSimp
     for i in c.hypothesesPos do
       let h := xs[i]!
       let hType ← instantiateMVars (← inferType h)
@@ -1255,6 +1267,10 @@ def trySimpCongrTheoremCore? (c : SimpCongrTheorem) (e : Expr) (packsByDSimp := 
         let byDSimp? ← if packsByDSimp then processPackHypothesisByDSimp? h hType else pure none
         if let some progress := byDSimp? then
           modified := modified || progress
+        else if packsByDSimp then
+          let (_, changed, hasProof) ← processCongrHypothesisCore h hType
+          modified := modified || changed
+          noProof := noProof && !hasProof
         else if let some progress ← (if pack then processPackCongrHypothesis? h hType defeq else pure none) then
           modified := modified || progress
           -- conservatively: any non-`HEq` hypothesis with a proof breaks definitional typing
@@ -1295,7 +1311,7 @@ def trySimpCongrTheoremCore? (c : SimpCongrTheorem) (e : Expr) (packsByDSimp := 
     if (← hasAssignableMVar proof <||> hasAssignableMVar eNew) then
       trace[Meta.Tactic.simp.congr] "{c.theoremName} has unassigned metavariables"
       return none
-    let r ← congrArgs { expr := eNew, proof? := proof } extraArgs
+    let r ← congrArgs { expr := eNew, proof? := if noProof then none else some proof } extraArgs
     if pack then
       let consistent ← pure extraArgs.isEmpty <&&> packCongrConsistent c.theoremName
       modify fun s => { s with congrResultConsistent := consistent }
