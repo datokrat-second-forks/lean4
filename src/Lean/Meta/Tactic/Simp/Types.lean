@@ -285,6 +285,8 @@ structure State where
   congrResultConsistent : Bool := false
   /-- Cache for `Simp.packCongrConsistent`. -/
   packCongrConsistent : Std.HashMap Name Bool := {}
+  /-- Cache for `Simp.hasBinderHypothesis`. -/
+  binderHypothesis : Std.HashMap Name Bool := {}
   /--
   For each function, the pack congruence theorems (`congr` if the flag is `false`, `dsimp_congr`
   otherwise) indexed by their left-hand sides, and their names. See `Simp.getPackCongrIndex`.

@@ -1444,12 +1444,15 @@ where
 Whether the congruence theorem `c` has a hypothesis under binders that is not a pack hypothesis,
 such as `∀ x, x ∈ s' → HEq (f x) (f' x)`.
 -/
-def hasBinderHypothesis (c : SimpCongrTheorem) : MetaM Bool := do
+def hasBinderHypothesis (c : SimpCongrTheorem) : SimpM Bool := do
+  if let some b := (← get).binderHypothesis[c.theoremName]? then return b
   let some (_, type) ← mkCongrTheoremConst? c.theoremName | return false
-  forallTelescopeReducing type fun xs _ =>
+  let b ← forallTelescopeReducing type fun xs _ =>
     c.hypothesesPos.anyM fun i => do
       let t ← inferType xs[i]!
       return t.isForall && !isPackHypothesis t
+  modify fun s => { s with binderHypothesis := s.binderHypothesis.insert c.theoremName b }
+  return b
 
 /--
 Applies a `@[dsimp_congr]` theorem in `simp`: rewrites `e` definitionally as `dsimp` would, except
@@ -1515,8 +1518,12 @@ def congrCore (e : Expr) : SimpM Result := do
       for c in packCs do
         if let some r ← trySimpCongrTheorem? c e then return r
       if let some r ← dsimpCongrInSimp? e all then return r
-    for c in otherCs do
-      if let some r ← trySimpCongrTheorem? c e then return r
+    -- A `dsimp_congr` theorem with a hypothesis under binders is the congruence of its head.
+    let dsimpCs ← if otherCs.isEmpty then pure [] else
+      pure ((← getDSimpCongrTheorems).get f.constName!)
+    unless (← dsimpCs.anyM hasBinderHypothesis) do
+      for c in otherCs do
+        if let some r ← trySimpCongrTheorem? c e then return r
     congrDefault e
   else
     congrDefault e
