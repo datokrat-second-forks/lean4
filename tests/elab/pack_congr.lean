@@ -577,3 +577,11 @@ example (Q : Nat → Prop) (k : Nat) (h : Q (up k)) : Q (upDown.toFun (up k)) :=
   simp only [upDown, down_up]
   guard_target =ₛ Q (up k)
   exact h
+
+/-! The reduction of the right-hand side of a pack congruence theorem does not unfold a `let` variable. -/
+
+example (Q : Nat → Prop) (k : Nat) : let p : Fn := ⟨fun n => n + 1⟩; Q (p.toFun k) → Q (p.toFun (down (up k))) := by
+  intro p h
+  dsimp only [down_up]
+  guard_target =ₛ Q (p.toFun k)
+  exact h

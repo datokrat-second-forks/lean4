@@ -172,7 +172,8 @@ def reduceProjOfCtor? (e : Expr) : MetaM (Option Expr) := do
   if info.fromClass then return none
   let args := e.getAppArgs
   unless args.size > info.numParams do return none
-  let s ← whnfR args[info.numParams]!
+  -- A `let` variable stays folded, as in `simp` without `zetaDelta`.
+  let s ← withConfig (fun c => { c with zetaDelta := false }) <| whnfR args[info.numParams]!
   unless s.isAppOf info.ctorName do return none
   let some field := s.getAppArgs[info.numParams + info.i]? | return none
   return mkAppN field args[(info.numParams + 1)...*]
