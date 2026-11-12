@@ -545,3 +545,35 @@ example (P : Nat → Prop) (h : P (zerK NatAlias₂)) : P (zerK NatAlias₂) := 
   fail_if_success simp only [natAlias₂_eq]
   fail_if_success dsimp only [natAlias₂_eq]
   exact h
+
+/-!
+The right-hand side of a pack congruence theorem can contain a new redex after its instantiation:
+here the projection of a constructor and a beta redex. `dsimp` and `simp` visit the reduced term again,
+so that a lemma applies to a subterm that only exists after the reduction.
+-/
+
+structure Fn where
+  toFun : Nat → Nat
+
+structure FnPack where
+  g : Fn
+
+@[dsimp_congr]
+theorem Fn.toFun_congr (g g' : Fn) (h : FnPack.mk g = FnPack.mk g') (n n' : Nat) (hn : n = n') :
+    g.toFun n = g'.toFun n' := by
+  cases h; cases hn; rfl
+
+def up (n : Nat) : Nat := n + 1
+def down (n : Nat) : Nat := n - 1
+theorem down_up (n : Nat) : down (up n) = n := rfl
+def upDown : Fn := ⟨fun n => up (down n)⟩
+
+example (Q : Nat → Prop) (k : Nat) (h : Q (up k)) : Q (upDown.toFun (up k)) := by
+  dsimp only [upDown, down_up]
+  guard_target =ₛ Q (up k)
+  exact h
+
+example (Q : Nat → Prop) (k : Nat) (h : Q (up k)) : Q (upDown.toFun (up k)) := by
+  simp only [upDown, down_up]
+  guard_target =ₛ Q (up k)
+  exact h

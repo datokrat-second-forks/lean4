@@ -741,17 +741,28 @@ def congrCandidates (fName : Name) (dsimp : Bool) (thms : List SimpCongrTheorem)
 Instantiates the right-hand side `rhs` of a congruence theorem and reduces the beta redexes and the
 projections of constructor applications that the instantiation creates, e.g.
 `(Bundle.of Nat).carrier` when a parameter `B'` in `B'.carrier` is instantiated with `Bundle.of Nat`.
-The values of the parameters `xs` are not visited.
+The values of the parameters `xs` are not visited. The second component tells whether a reduction
+took place: the result then can have subterms that `dsimp` did not visit yet.
 -/
-def instantiateCongrRhs (rhs : Expr) (xs : Array Expr) : MetaM Expr := do
+def instantiateCongrRhsCore (rhs : Expr) (xs : Array Expr) : MetaM (Expr × Bool) := do
   let vals ← xs.mapM instantiateMVars
   let rhs ← instantiateMVars rhs
-  Meta.transform rhs
+  let reduced ← IO.mkRef false
+  let r ← Meta.transform rhs
     (pre := fun s => return if vals.contains s then .done s else .continue)
     (post := fun s => do
-      if s.isHeadBetaTarget then return .visit s.headBeta
-      if let some s' ← reduceProjOfCtor? s then return .visit s'
+      if s.isHeadBetaTarget then
+        reduced.set true
+        return .visit s.headBeta
+      if let some s' ← reduceProjOfCtor? s then
+        reduced.set true
+        return .visit s'
       return .continue)
+  return (r, ← reduced.get)
+
+@[inherit_doc instantiateCongrRhsCore]
+def instantiateCongrRhs (rhs : Expr) (xs : Array Expr) : MetaM Expr :=
+  return (← instantiateCongrRhsCore rhs xs).1
 
 /--
 Whether rewriting `e` to `e'` keeps the constructor form: if `e` is an application of the constructor
@@ -834,10 +845,11 @@ the theorem applies without progress.
 
 In `simpMode`, the new parameters of `HEq` hypotheses that are trailing arguments of the right-hand
 side are not dsimped but left to `simp`, together with the arguments of `e` beyond the left-hand
-side; the second component is the number of these trailing arguments.
+side; the second component is the number of these trailing arguments. The last component tells
+whether the instantiation of the right-hand side reduced a redex (see `instantiateCongrRhsCore`).
 -/
 private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode := false) :
-    SimpM (Option (Expr × Nat × Bool)) := withNewMCtxDepth do
+    SimpM (Option (Expr × Nat × Bool × Bool)) := withNewMCtxDepth do
   let h0 ← IO.getNumHeartbeats
   let mode := if simpMode then "simp" else "dsimp"
   let thmShort := c.theoremName.getString!
@@ -936,8 +948,9 @@ private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode :=
   unless (← withAssignableSyntheticOpaque <|
       synthesizeArgs (.decl c.theoremName) (params.map (·.2)) (params.map (·.1))) do
     return none
-  let eNew ← if modified || simp.packCongr.canonicalize.get (← getOptions) then instantiateCongrRhs rhs xs
-    else pure eFn
+  let (eNew, reduced) ← if modified || simp.packCongr.canonicalize.get (← getOptions) then
+      instantiateCongrRhsCore rhs xs
+    else pure (eFn, false)
   modified := modified || eNew != eFn
   if (← hasAssignableMVar eNew) then return none
   if modified then
@@ -953,7 +966,7 @@ private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode :=
     for j in (resArgs.size - extraArgs.size)...resArgs.size do
       if infos[j]?.any (fun info => info.isInstance || info.binderInfo.isInstImplicit) then
         unless (← revertInstanceTypeChanges.hasExpectedType fType resArgs j) do return none
-  return some (res, if simpMode then numTrailing + extraArgs.size else 0, simpMode && proofHEq)
+  return some (res, if simpMode then numTrailing + extraArgs.size else 0, simpMode && proofHEq, reduced)
 
 /--
 Applies `@[dsimp_congr]` theorems at the head of `e`. A theorem that applies replaces the visit of
@@ -969,9 +982,11 @@ private def dsimpCongr (post : DSimproc) : DSimproc := fun e => do
     let hb ← IO.getNumHeartbeats
     let r ← tryDSimpCongrTheorem? c e
     trace[Debug.Meta.Tactic.simp.congrCost] "dsimp {c.theoremName} {(← IO.getNumHeartbeats) - hb} {r.isSome} {r.any (·.1 != e)}"
-    if let some (eNew, _) := r then
+    if let some (eNew, _, _, reduced) := r then
       -- Without progress, the arguments still need the plain visit, as in `simp`.
       if eNew == e && debug.simp.packCongr.fallback.get (← getOptions) then continue
+      -- After a reduction, the result has subterms that `dsimp` did not visit yet.
+      if reduced then return .visit eNew
       return match (← post eNew) with
         | .visit e' => .visit e'
         | .done e' | .continue (some e') => .done e'
@@ -1359,7 +1374,7 @@ def dsimpCongrInSimp? (e : Expr) (skip : List SimpCongrTheorem) : SimpM (Option 
     if skip.any (·.theoremName == c.theoremName) then continue
     if ctorOnly && (← packValueOnlyTheorem c) then continue
     let hb ← IO.getNumHeartbeats
-    let some (eNew, n, viaDefault) ← tryDSimpCongrTheorem? c e (simpMode := true) | continue
+    let some (eNew, n, viaDefault, _) ← tryDSimpCongrTheorem? c e (simpMode := true) | continue
     let args := eNew.getAppArgs
     let k := args.size - n
     let hA ← IO.getNumHeartbeats
