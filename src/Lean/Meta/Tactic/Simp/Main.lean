@@ -910,6 +910,16 @@ private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode :=
     else if hType.isForall then
       -- A pack hypothesis under binders: simplify the pack with the bound variables in the context.
       let some m ← forallTelescope hType fun ys body => do
+          if let some (_, l, _, r) := body.heq? then
+            -- An `HEq` hypothesis under binders. `simp` does not get here (see `dsimpCongrInSimp?`).
+            let l ← instantiateMVars l
+            let l' ← dsimp l
+            let val ← mkLambdaFVars r.getAppArgs l'
+            -- An argument that is not a lambda keeps its form.
+            let rawLhs := (← inferType xs[i]!).getForallBody.appFn!.appFn!.appArg!
+            let isLam := (← instantiateMVars rawLhs.getAppFn).isLambda
+            r.getAppFn.mvarId!.assign (if isLam then val else val.eta)
+            return some (l' != l)
           let some (l, r) := body.eqOrIff? | return none
           let some (ci, us, rArgs) ← packCtorApp? r | return none
           let v ← packEtaM (← instantiateMVars l)
@@ -1061,11 +1071,23 @@ def congrDefault (e : Expr) : SimpM Result := do
 /-- Process the given congruence theorem hypothesis. Return true if it made "progress". -/
 def processCongrHypothesis (h : Expr) (hType : Expr) : SimpM Bool := do
   forallTelescopeReducing hType fun xs hType => withNewLemmas xs do
-    let lhs ← instantiateMVars hType.appFn!.appArg!
+    let heq := hType.isHEq
+    let lhs ← instantiateMVars (if heq then hType.appFn!.appFn!.appArg! else hType.appFn!.appArg!)
     let r ← simp lhs
     let rhs := hType.appArg!
     rhs.withApp fun m zs => do
       let val ← mkLambdaFVars zs r.expr
+      if heq then
+        -- The two sides have types that are only definitionally equal after the pack hypotheses, so
+        -- unification at the transparency of `simp` would reject the value and the proof.
+        -- An argument that is not a lambda keeps its form.
+        let rawLhs := (← inferType h).getForallBody.appFn!.appFn!.appArg!
+        let isLam := (← instantiateMVars rawLhs.getAppFn).isLambda
+        m.mvarId!.assign (if isLam then val else val.eta)
+        let α ← inferType lhs
+        let proof := mkApp4 (mkConst ``heq_of_eq [← getLevel α]) α lhs r.expr (← r.getProof)
+        h.mvarId!.assign (← mkLambdaFVars xs (← mkExpectedTypeHint proof (← instantiateMVars hType)))
+        return r.expr != lhs
       unless (← withSimpMetaConfig <| isDefEq m val) do
         throwCongrHypothesisFailed
       let mut proof ← r.getProof
@@ -1162,8 +1184,32 @@ def processPackCongrHypothesis? (h hType : Expr) (defeq := true) : SimpM (Option
   h.mvarId!.assign (← mkExpectedTypeHint proof (← instantiateMVars hType))
   return some (r.expr != v)
 
-/-- Try to rewrite `e` children using the given congruence theorem -/
-def trySimpCongrTheoremCore? (c : SimpCongrTheorem) (e : Expr) : SimpM (Option Result) := withNewMCtxDepth do withParent e do
+/--
+Processes a pack hypothesis as `dsimp` does: the new pack is definitionally equal to the old one,
+and the proof is `rfl`. Returns `none` for other hypotheses.
+-/
+def processPackHypothesisByDSimp? (h hType : Expr) : SimpM (Option Bool) := do
+  unless isPackHypothesis hType do return none
+  forallTelescope hType fun ys body => do
+    let some (_, l, r) := body.eq? | return none
+    let some (ci, us, rArgs) ← packCtorApp? r | return none
+    let v ← packEtaM (← instantiateMVars l)
+    let v' ← if simp.packCongr.ctorOnly.get (← getOptions) && (← packCtorApp? v).isSome then
+        dsimpPackValue v
+      else withPackCtorGuard <| dsimp v
+    let vals ← packFields ci us (rArgs.extract 0 ci.numParams) v'
+    for m in rArgs.extract ci.numParams rArgs.size, val in vals do
+      m.getAppFn.mvarId!.assign (← mkLambdaFVars ys val)
+    let proof ← mkExpectedTypeHint (← mkEqRefl v) (← instantiateMVars body)
+    h.mvarId!.assign (← mkLambdaFVars ys proof)
+    return some (v' != v)
+
+/--
+Try to rewrite `e` children using the given congruence theorem. With `packsByDSimp`, the pack
+hypotheses are processed as in `dsimp` (see `dsimpCongrInSimp?`).
+-/
+def trySimpCongrTheoremCore? (c : SimpCongrTheorem) (e : Expr) (packsByDSimp := false) :
+    SimpM (Option Result) := withNewMCtxDepth do withParent e do
   recordCongrTheorem c.theoremName
   trace[Debug.Meta.Tactic.simp.congr] "{c.theoremName}, {e}"
   let some (thm, thmType) ← mkCongrTheoremConst? c.theoremName | return none
@@ -1206,7 +1252,10 @@ def trySimpCongrTheoremCore? (c : SimpCongrTheorem) (e : Expr) : SimpM (Option R
       let hType ← instantiateMVars (← inferType h)
       let hType ← if thmHasBinderNameHint then hType.resolveBinderNameHint else pure hType
       try
-        if let some progress ← (if pack then processPackCongrHypothesis? h hType defeq else pure none) then
+        let byDSimp? ← if packsByDSimp then processPackHypothesisByDSimp? h hType else pure none
+        if let some progress := byDSimp? then
+          modified := modified || progress
+        else if let some progress ← (if pack then processPackCongrHypothesis? h hType defeq else pure none) then
           modified := modified || progress
           -- conservatively: any non-`HEq` hypothesis with a proof breaks definitional typing
           unless hType.isHEq do
@@ -1376,10 +1425,23 @@ where
     return some rhs
 
 /--
+Whether the congruence theorem `c` has a hypothesis under binders that is not a pack hypothesis,
+such as `∀ x, x ∈ s' → HEq (f x) (f' x)`.
+-/
+def hasBinderHypothesis (c : SimpCongrTheorem) : MetaM Bool := do
+  forallTelescopeReducing (← getConstInfo c.theoremName).type fun xs _ =>
+    c.hypothesesPos.anyM fun i => do
+      let t ← inferType xs[i]!
+      return t.isForall && !isPackHypothesis t
+
+/--
 Applies a `@[dsimp_congr]` theorem in `simp`: rewrites `e` definitionally as `dsimp` would, except
 for the trailing arguments that are new parameters of `HEq` hypotheses, which are then simplified by
 ordinary congruence (see `tryDSimpCongrTheorem?`). Thus a proof is only needed for these arguments,
 and it does not involve `HEq`.
+
+If the theorem has a hypothesis under binders (see `hasBinderHypothesis`), `simp` instead applies
+the theorem with proofs, as for a `@[congr]` theorem, but rewrites the packs definitionally.
 -/
 def dsimpCongrInSimp? (e : Expr) (skip : List SimpCongrTheorem) : SimpM (Option Result) := do
   let .const fName _ := e.getAppFn | return none
@@ -1392,6 +1454,13 @@ def dsimpCongrInSimp? (e : Expr) (skip : List SimpCongrTheorem) : SimpM (Option 
     if skip.any (·.theoremName == c.theoremName) then continue
     if ctorOnly && (← packValueOnlyTheorem c) then continue
     let hb ← IO.getNumHeartbeats
+    if (← hasBinderHypothesis c) then
+      -- The trailing arguments need the hypotheses of the theorem, so `simp` applies it with proofs.
+      let some r ← trySimpCongrTheoremCore? c e (packsByDSimp := true) | continue
+      if r.expr == e then
+        unchanged := true
+        continue
+      return some r
     let some (eNew, n, viaDefault, _) ← tryDSimpCongrTheorem? c e (simpMode := true) | continue
     let args := eNew.getAppArgs
     let k := args.size - n

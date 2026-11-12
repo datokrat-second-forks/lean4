@@ -120,7 +120,8 @@ have *pack hypotheses* `p = S.mk ps fs'`, where `S` is a structure that is not a
 `fs'` are new, and `p` is a value of `S`, typically `S.mk ps fs` for arguments `fs` that depend on
 each other. A pack hypothesis of a `dsimp_congr` theorem may be under binders,
 `∀ ys, p = S.mk ps (fs' ys)`, for packs of families. If `allowHEq` holds (for `dsimp_congr`), it may also have hypotheses `HEq a a'` for new
-parameters `a'`, and the conclusion may be `HEq lhs rhs`.
+parameters `a'`, possibly under binders (`∀ ys, HEq a (a' zs)` for bound variables `zs`), and the
+conclusion may be `HEq lhs rhs`.
 -/
 def mkSimpCongrTheorem (declName : Name) (prio : Nat) (allowHEq := false) :
     MetaM SimpCongrTheorem := withReducible do
@@ -149,10 +150,13 @@ def mkSimpCongrTheorem (declName : Name) (prio : Nat) (allowHEq := false) :
             if let some (_, xLhs, _, xRhs) := xType.heq? then
               unless allowHEq do
                 throwError "Invalid `congr` theorem: Parameter #{i+1} is an `HEq` hypothesis, which only `dsimp_congr` theorems support{indentExpr xType}"
-              unless ys.isEmpty && onlyMVarsAt xLhs foundMVars && xRhs.isMVar &&
-                  !foundMVars.contains xRhs.mvarId! do
-                throwError "Invalid `congr` theorem: Parameter #{i+1} is not a valid `HEq` hypothesis, which must have the form `HEq a a'` with a new parameter `a'`{indentExpr xType}"
-              return some (#[xRhs.mvarId!], true)
+              let xRhsFn := xRhs.getAppFn
+              unless onlyMVarsAt xLhs foundMVars && xRhsFn.isMVar &&
+                  !foundMVars.contains xRhsFn.mvarId! &&
+                  xRhs.getAppArgs.all (fun a => a.isFVar && ys.contains a) &&
+                  (← ys.allM fun y => return onlyMVarsAt (← inferType y) foundMVars) do
+                throwError "Invalid `congr` theorem: Parameter #{i+1} is not a valid `HEq` hypothesis, which must have the form `HEq a a'` or `∀ ys, HEq a (a' zs)` with a new parameter `a'` and bound variables `zs`{indentExpr xType}"
+              return some (#[xRhsFn.mvarId!], true)
             match xType.eqOrIff? with
             | none => pure none -- skip
             | some (xLhs, xRhs) =>
@@ -275,6 +279,10 @@ def mkDSimpCongrTheorem (declName : Name) (prio : Nat) : MetaM SimpCongrTheorem 
     let hType ← instantiateMVars (← inferType xs[i]!)
     if let some (_, l, _, r) := hType.heq? then
       r.mvarId!.assign l
+    else if hType.isForall && hType.getForallBody.isHEq then
+      forallTelescope hType fun _ body => do
+        let some (_, l, _, r) := body.heq? | unreachable!
+        r.getAppFn.mvarId!.assign (← mkLambdaFVars r.getAppArgs l)
     else if hType.isForall && isPackHypothesis hType then
       forallTelescope hType fun ys body => do
         let some (l, r) := body.eqOrIff? | unreachable!
