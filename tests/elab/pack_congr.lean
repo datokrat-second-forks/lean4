@@ -505,3 +505,23 @@ example (P : Nat → Prop) (h : P (@zerTag Nat (@ZerA.toZer Nat _))) :
   set_option trace.Meta.synthInstance true in
   dsimp only [AAlias.zerAPack]
   exact h
+
+/-!
+A pack congruence theorem for an under-applied head: the term has an instance argument after the
+left-hand side of the theorem. The theorem does not rewrite that instance, so the instance type check
+runs on the result and the rewrite of the carrier is reverted.
+-/
+
+structure TypePack where
+  α : Type
+
+def zerK (α : Type) [Zer α] : Nat := 0
+
+@[dsimp_congr]
+theorem zerK_congr {α α' : Type} (h : TypePack.mk α = TypePack.mk α') : HEq (@zerK α) (@zerK α') := by
+  cases h; rfl
+
+example (P : Nat → Prop) (h : P (zerK NatAlias₂)) : P (zerK NatAlias₂) := by
+  fail_if_success simp only [natAlias₂_eq]
+  fail_if_success dsimp only [natAlias₂_eq]
+  exact h

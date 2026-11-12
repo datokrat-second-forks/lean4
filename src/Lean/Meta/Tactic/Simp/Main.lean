@@ -934,9 +934,12 @@ private def tryDSimpCongrTheorem? (c : SimpCongrTheorem) (e : Expr) (simpMode :=
   if modified then
     trace[Meta.Tactic.simp.congr] "dsimp_congr {c.theoremName}{indentExpr e}\n==>{indentExpr eNew}"
   recordPackStat s!"{mode} {thmShort} finish {modified}" ((← IO.getNumHeartbeats) - h2)
-  if simpMode then
-    return some (mkAppN eNew extraArgs, numTrailing + extraArgs.size, proofHEq)
-  return some (mkAppN eNew (← extraArgs.mapM dsimp), 0, false)
+  let mut res := mkAppN eNew (← if simpMode then pure extraArgs else extraArgs.mapM dsimp)
+  -- The theorem does not cover the arguments after its left-hand side. An instance among them can
+  -- depend on an argument that the theorem rewrote.
+  if !extraArgs.isEmpty && backward.dsimp.instanceTypes.get (← getOptions) then
+    res ← revertInstanceTypeChanges e res
+  return some (res, if simpMode then numTrailing + extraArgs.size else 0, simpMode && proofHEq)
 
 /--
 Applies `@[dsimp_congr]` theorems at the head of `e`. A theorem that applies replaces the visit of
