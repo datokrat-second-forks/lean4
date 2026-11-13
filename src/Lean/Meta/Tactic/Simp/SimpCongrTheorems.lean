@@ -13,6 +13,8 @@ import Lean.Meta.ExprDefEq
 import Lean.Structure
 import Lean.Meta.FunInfo
 import Lean.Meta.Transform
+public import Lean.Meta.DiscrTree
+import Lean.Meta.AppBuilder
 
 public section
 
@@ -212,9 +214,104 @@ register_builtin_option debug.simp.congr.allowHEq : Bool := {
     descr    := "(simp) DEBUG: allow `HEq` hypotheses and conclusions in `congr` theorems"
   }
 
+namespace Simp
+
+/--
+Instantiates the congruence theorem `declName` and returns it with its type. Returns `none` if the
+current scope cannot access the theorem: as with instances, a theorem of a privately imported module
+is not used in a public signature.
+-/
+def mkCongrTheoremConst? (declName : Name) : MetaM (Option (Expr × Expr)) := do
+  let env ← getEnv
+  if env.isExporting && !env.contains declName then return none
+  let thm ← mkConstWithFreshMVarLevels declName
+  return some (thm, ← inferType thm)
+
+/--
+The term that indexes a pack value `e`, or the left-hand side `e` of a pack congruence theorem if
+`pattern` is set. Discrimination trees ignore instance arguments, but the lenses for the parent
+projections into one class differ only in the instance field of the pack value. So for a pack value,
+the instance fields are added as explicit components of the key. In a pattern, only an instance
+field that is a projection of a class is kept: another instance can match a different instance
+that is definitionally equal, so it becomes a metavariable.
+-/
+def packIndexTerm (e : Expr) (pattern := false) : MetaM Expr := do
+  if (← packCtorApp? e).isNone then return e
+  let e ← whnfR e
+  let args := e.getAppArgs
+  let infos := (← getFunInfoNArgs e.getAppFn args.size).paramInfo
+  let mut r := e
+  for h : i in *...args.size do
+    if infos[i]?.any (·.isInstance) then
+      let mut inst := args[i]
+      if pattern then
+        let isClassProj ← match inst.getAppFn with
+          | .const n _ => pure ((← getProjectionFnInfo? n).any (·.fromClass))
+          | _ => pure false
+        unless isClassProj do inst ← mkFreshExprMVar (← inferType inst)
+      r ← mkAppM ``PProd.mk #[r, inst]
+  return r
+
+/--
+The discrimination tree keys of the left-hand side of the congruence theorem `c` if it is a pack
+congruence theorem: one with a pack or `HEq` hypothesis or an `HEq` conclusion.
+-/
+def mkPackCongrKeys? (c : SimpCongrTheorem) : MetaM (Option (Array DiscrTree.Key)) :=
+  withNewMCtxDepth do
+    let some (_, thmType) ← mkCongrTheoremConst? c.theoremName | return none
+    let (xs, _, type) ← forallMetaTelescopeReducing thmType
+    let isPack ← pure type.isHEq <||> c.hypothesesPos.anyM fun i => do
+      let t ← inferType xs[i]!
+      return isPackHypothesis t || t.isHEq
+    unless isPack do return none
+    let lhs := if type.isHEq then type.appFn!.appFn!.appArg! else type.appFn!.appArg!
+    return some (← withReducible <| DiscrTree.mkPath (← packIndexTerm lhs (pattern := true)))
+
+/--
+The index of the pack congruence theorems: for each `congr` or `dsimp_congr` theorem its keys
+(`none` if it is not a pack congruence theorem, see `mkPackCongrKeys?`), and for each head function
+the discrimination tree of its pack congruence theorems.
+-/
+structure PackCongrIndex where
+  keys  : PHashMap Name (Option (Array DiscrTree.Key)) := {}
+  trees : PHashMap Name (DiscrTree Name) := {}
+  deriving Inhabited
+
+/-- A theorem, its head function and its keys. -/
+abbrev PackCongrIndexEntry := Name × Name × Option (Array DiscrTree.Key)
+
+def PackCongrIndex.addEntry (s : PackCongrIndex) (e : PackCongrIndexEntry) : PackCongrIndex :=
+  let (thm, fName, keys?) := e
+  if s.keys.contains thm then s else
+  let s := { s with keys := s.keys.insert thm keys? }
+  match keys? with
+  | none => s
+  | some keys =>
+    { s with trees := s.trees.insert fName (((s.trees.find? fName).getD {}).insertKeyValue keys thm) }
+
+builtin_initialize packCongrIndexExtension :
+    SimplePersistentEnvExtension PackCongrIndexEntry PackCongrIndex ←
+  registerSimplePersistentEnvExtension {
+    addEntryFn    := PackCongrIndex.addEntry
+    addImportedFn := fun ess => ess.foldl (init := {}) fun s es => es.foldl PackCongrIndex.addEntry s
+  }
+
+def getPackCongrIndexState (env : Environment) : PackCongrIndex :=
+  packCongrIndexExtension.getState (asyncMode := .local) env
+
+/-- Records the index keys of the congruence theorem `c`, so that `simp` does not compute them. -/
+def recordPackCongrKeys (c : SimpCongrTheorem) : MetaM Unit := do
+  if (getPackCongrIndexState (← getEnv)).keys.contains c.theoremName then return
+  let keys? ← withoutExporting <| mkPackCongrKeys? c
+  modifyEnv fun env =>
+    packCongrIndexExtension.addEntry (asyncMode := .local) env (c.theoremName, c.funName, keys?)
+
+end Simp
+
 def addSimpCongrTheorem (declName : Name) (attrKind : AttributeKind) (prio : Nat) : MetaM Unit := do
   let lemma ← mkSimpCongrTheorem declName prio (allowHEq := debug.simp.congr.allowHEq.get (← getOptions))
   congrExtension.add lemma attrKind
+  Simp.recordPackCongrKeys lemma
 
 /--
 Registers `simp` congruence lemmas.
@@ -324,8 +421,10 @@ builtin_initialize
     descr := "congruence theorem for dsimp"
     add   := fun declName stx attrKind => do
       let prio ← getAttrParamOptPrio stx[1]
-      let c ← (mkDSimpCongrTheorem declName prio).run' {} {}
-      dsimpCongrExtension.add c attrKind
+      discard <| (do
+        let c ← mkDSimpCongrTheorem declName prio
+        dsimpCongrExtension.add c attrKind
+        Simp.recordPackCongrKeys c : MetaM Unit).run {} {}
   }
 
 def getDSimpCongrTheorems : CoreM SimpCongrTheorems :=

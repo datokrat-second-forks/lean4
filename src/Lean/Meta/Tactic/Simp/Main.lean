@@ -668,65 +668,27 @@ where
     withNewMCtxDepth <| withExactInstancesConfig <| isDefEqGuarded type d
 
 /--
-Instantiates the congruence theorem `declName` and returns it with its type. Returns `none` if the
-current scope cannot access the theorem: as with instances, a theorem of a privately imported module
-is not used in a public signature.
--/
-def mkCongrTheoremConst? (declName : Name) : MetaM (Option (Expr × Expr)) := do
-  let env ← getEnv
-  if env.isExporting && !env.contains declName then return none
-  let thm ← mkConstWithFreshMVarLevels declName
-  return some (thm, ← inferType thm)
-
-/--
-The term that indexes a pack value `e`, or the left-hand side `e` of a pack congruence theorem if
-`pattern` is set. Discrimination trees ignore instance arguments, but the lenses for the parent
-projections into one class differ only in the instance field of the pack value. So for a pack value,
-the instance fields are added as explicit components of the key. In a pattern, only an instance
-field that is a projection of a class is kept: another instance can match a different instance
-that is definitionally equal, so it becomes a metavariable.
--/
-def packIndexTerm (e : Expr) (pattern := false) : MetaM Expr := do
-  if (← packCtorApp? e).isNone then return e
-  let e ← whnfR e
-  let args := e.getAppArgs
-  let infos := (← getFunInfoNArgs e.getAppFn args.size).paramInfo
-  let mut r := e
-  for h : i in *...args.size do
-    if infos[i]?.any (·.isInstance) then
-      let mut inst := args[i]
-      if pattern then
-        let isClassProj ← match inst.getAppFn with
-          | .const n _ => pure ((← getProjectionFnInfo? n).any (·.fromClass))
-          | _ => pure false
-        unless isClassProj do inst ← mkFreshExprMVar (← inferType inst)
-      r ← mkAppM ``PProd.mk #[r, inst]
-  return r
-
-/--
-Returns the pack congruence theorems among `thms` (those with a pack or `HEq` hypothesis or an
-`HEq` conclusion) indexed by their left-hand sides, and their names. Only candidates retrieved
-from the index are tried on a term, so that terms that the left-hand side cannot match are rejected
-cheaply.
+Returns the index of the pack congruence theorems of the head function `fName` and the names of the
+pack congruence theorems among `thms`. Only candidates retrieved from the index are tried on a
+term, so that terms that the left-hand side cannot match are rejected cheaply. The index comes from
+`packCongrIndexExtension`. It can contain theorems that are not in `thms`.
 -/
 def getPackCongrIndex (fName : Name) (dsimp : Bool) (thms : List SimpCongrTheorem) :
     SimpM (DiscrTree Name × NameSet) := do
   if let some r := (← get).packCongrIndex[(fName, dsimp)]? then return r
-  let mut tree := {}
+  let index := getPackCongrIndexState (← getEnv)
+  let mut tree := (index.trees.find? fName).getD {}
   let mut packs : NameSet := {}
   for c in thms do
-    let keys? ← withNewMCtxDepth do
-      let some (_, thmType) ← mkCongrTheoremConst? c.theoremName | return none
-      let (xs, _, type) ← forallMetaTelescopeReducing thmType
-      let isPack ← pure type.isHEq <||> c.hypothesesPos.anyM fun i => do
-        let t ← inferType xs[i]!
-        return isPackHypothesis t || t.isHEq
-      unless isPack do return none
-      let lhs := if type.isHEq then type.appFn!.appFn!.appArg! else type.appFn!.appArg!
-      return some (← withReducible <| DiscrTree.mkPath (← packIndexTerm lhs (pattern := true)))
-    if let some keys := keys? then
-      tree := tree.insertKeyValue keys c.theoremName
-      packs := packs.insert c.theoremName
+    match index.keys.find? c.theoremName with
+    | some (some _) => packs := packs.insert c.theoremName
+    | some none => pure ()
+    | none =>
+      -- The attribute was added by a compiler that did not record the keys.
+      recordPackStat "index compute" 0
+      if let some keys ← mkPackCongrKeys? c then
+        tree := tree.insertKeyValue keys c.theoremName
+        packs := packs.insert c.theoremName
   modify fun s => { s with packCongrIndex := s.packCongrIndex.insert (fName, dsimp) (tree, packs) }
   return (tree, packs)
 
