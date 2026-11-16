@@ -687,6 +687,47 @@ private def checkTypesForInstanceTypedMVarAssignment (mvarType vType v : Expr) :
   forallTelescope mvarType fun xs body => do
     withExactInstancesConfig <| Meta.isExprDefEqAux body (← inferType (mkAppN v xs))
 
+/--
+Measurement only: when the instance-type check rejects an assignment to an instance metavariable of
+the elaborator, synthesize the instance for the type of the metavariable and require the rejected
+value to be definitionally equal to the result. Never applies during instance synthesis.
+-/
+register_builtin_option backward.isDefEq.resynthInstances : Bool := {
+  defValue := false
+  descr    := "if true, fall back to instance synthesis when the instance-type check rejects an \
+  assignment to an instance metavariable outside of instance synthesis"
+}
+
+/-- Measurement only: extend `backward.isDefEq.resynthInstances` to class-typed metavariables of kind `natural`. -/
+register_builtin_option backward.isDefEq.resynthInstances.natural : Bool := {
+  defValue := false
+  descr    := "if true, `backward.isDefEq.resynthInstances` also applies to class-typed natural metavariables"
+}
+
+private def resynthInstanceMVarAndUnify (mvar v : Expr) : MetaM Bool := do
+  -- Instance synthesis records its dependencies, so this also excludes the unifier calls inside it.
+  if (← readThe Core.Context).isRecordingDeps then return false
+  if (← read).inTypeClassResolution then return false
+  let opts ← getOptionsUnrestricted
+  unless backward.isDefEq.resynthInstances.get opts do return false
+  let kind ← mvar.mvarId!.getKind
+  unless kind matches .synthetic do
+    unless backward.isDefEq.resynthInstances.natural.get opts && kind matches .natural do
+      trace[Meta.isDefEq.resynth] "not an instance metavariable: {mvar}"
+      return false
+    trace[Meta.isDefEq.resynth] "natural: {← inferType mvar}"
+  checkpointDefEq do
+    unless (← Meta.synthPending mvar.mvarId!) do
+      trace[Meta.isDefEq.resynth] "no instance: {← inferType mvar}"
+      return false
+    let inst ← instantiateMVars mvar
+    if (← Meta.isExprDefEqAux v inst) then
+      trace[Meta.isDefEq.resynth] "ok: {← inferType mvar}"
+      return true
+    else
+      trace[Meta.isDefEq.resynth] "different instance: {inst} vs {v}"
+      return false
+
 private def checkTypesAndAssign (mvar : Expr) (v : Expr) : MetaM Bool :=
   withTraceNodeBefore `Meta.isDefEq.assign.checkTypes (fun _ => return m!"({mvar} : {← inferType mvar}) := ({v} : {← inferType v})") do
     if !mvar.isMVar then
@@ -702,7 +743,7 @@ private def checkTypesAndAssign (mvar : Expr) (v : Expr) : MetaM Bool :=
         if (← isDiagnosticsEnabled) then
           if (← withoutModifyingState <| withInferTypeConfig <| Meta.isExprDefEqAux mvarType vType) then
             trace[diagnostics] "failure when assigning class-typed metavariable with type{indentExpr mvarType}\nwhich is not definitionally equal to{indentExpr vType}\nwhen using `.instances` transparency, but it is with `.default`.\nWorkaround: `set_option backward.isDefEq.respectTransparency.instanceTypes false`"
-        return false
+        return (← resynthInstanceMVarAndUnify mvar v)
       unless (← spineMVarsAdmissible v) do
         if (← isDiagnosticsEnabled) then
           trace[diagnostics] "failure when assigning class-typed metavariable with type{indentExpr mvarType}\nthe value{indentExpr v}\ncontains a metavariable whose assignment can change the type of the value.\nWorkaround: `set_option backward.isDefEq.respectTransparency.instanceTypes false`"
@@ -2614,6 +2655,7 @@ partial def isExprDefEqAuxImpl (t : Expr) (s : Expr) : MetaM Bool := withIncRecD
 
 builtin_initialize
   registerTraceClass `Meta.isDefEq
+  registerTraceClass `Meta.isDefEq.resynth
   registerTraceClass `Meta.isDefEq.stuck
   registerTraceClass `Meta.isDefEq.stuckMVar (inherited := true)
   registerTraceClass `Meta.isDefEq.cache
