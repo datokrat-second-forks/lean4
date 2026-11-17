@@ -654,6 +654,13 @@ private partial def revertInstanceTypeChanges (orig new : Expr) : MetaM Expr := 
       -- Keep rewrites that do not cause the mismatch.
       unless (← hasExpectedType origFType origArgs j) do continue
       reverts := (info.backDeps.push j).filter changed
+      if (← isTracingEnabledFor `Meta.Tactic.simp.instanceTypesKind) then
+        -- MEASUREMENT: does each undone rewrite hold at `.instances` transparency?
+        let atInst ← reverts.allM fun i =>
+          withNewMCtxDepth <| withExactInstancesConfig <| isDefEqGuarded origArgs[i]! args[i]!
+        let atImplicit ← reverts.allM fun i =>
+          withNewMCtxDepth <| withImplicitConfig <| isDefEqGuarded origArgs[i]! args[i]!
+        addTrace `Meta.Tactic.simp.instanceTypesKind m!"REVERT head={f.constName?} instances={atInst} implicit={atImplicit}"
       if (← isTracingEnabledFor `Meta.Tactic.simp.instanceTypes) then
         let mut msg := m!"reverting the rewrites of the arguments at positions {reverts} of{indentExpr new}"
         for i in reverts do
