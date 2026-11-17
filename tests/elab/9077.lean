@@ -4,7 +4,7 @@ the expected type at instance transparency. Notable exception: outParams might o
 higher transparency.
 
 Tests both settings of `backward.isDefEq.respectTransparency.instanceSearchTypes`:
-- `false`: old behavior,
+- `false`: old behavior (together with `tcUnifyInstanceImplicits true`, without which the instance arguments are synthesized instead),
 - `true`: reject assignments to instance-implicit argument metavariables of the wrong type, falling
   back to synthesizing the instance and unifying the candidate value with the result.
 -/
@@ -31,6 +31,7 @@ With `true`, this assignment is rightfully rejected.
 
 /-- info: inst (Copy E) -/
 #guard_msgs in
+set_option tcUnifyInstanceImplicits true in
 set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in
 variable (E : Type) [iQ : Q E] in
 #synth N (H (Copy E) rfl)
@@ -58,6 +59,7 @@ instance instG (α : Type) [q : Q α] : M (G α q) where
 
 /-- info: instG (Copy E) -/
 #guard_msgs in
+set_option tcUnifyInstanceImplicits true in
 set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in
 variable (E : Type) [iQ : Q E] in
 #synth M (G (Copy E) iQ)
@@ -84,6 +86,7 @@ instance qCopy [Q E] : Q (Copy E) := ‹Q E›
 
 /-- info: instG (Copy E) -/
 #guard_msgs in
+set_option tcUnifyInstanceImplicits true in
 set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in
 variable (E : Type) [iQ : Q E] in
 #synth M (G (Copy E) iQ)
@@ -111,6 +114,7 @@ instance instInitBox (α : Type) [R α] : Init (Box α) := ⟨⟨⟩⟩
 def useBox (_b : Box Nat) : Nat := 0
 
 #guard_msgs in
+set_option tcUnifyInstanceImplicits true in
 set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in
 example : Nat :=
   let x : Box _ := Init.init

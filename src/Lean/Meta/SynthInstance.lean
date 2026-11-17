@@ -201,6 +201,8 @@ structure TableEntry where
 structure Context where
   maxResultSize : Nat
   maxHeartbeats : Nat
+  /-- Value of `tcUnifyInstanceImplicits`, read once per query. -/
+  unifyInstanceImplicits : Bool
 
 /--
   Remark: the SynthInstance.State is not really an extension of `Meta.State`.
@@ -375,7 +377,8 @@ def getSubgoals (lctx : LocalContext) (localInsts : LocalInstances) (xs : Array 
   Remark: `mctx` is set using `withMCtx`.
   If it succeeds, the result is a new updated metavariable context and a new list of subgoals.
   A subgoal is created for each instance implicit parameter of `inst`. -/
-def tryResolve (mvar : Expr) (inst : Instance) : MetaM (Option (MetavarContext × List Expr)) := do
+def tryResolve (mvar : Expr) (inst : Instance) (unifyInstanceImplicits : Bool) :
+    MetaM (Option (MetavarContext × List Expr)) := do
   if (← isDiagnosticsEnabled) then
     if let .const declName _ := inst.val.getAppFn then
       recordInstance declName
@@ -394,8 +397,7 @@ def tryResolve (mvar : Expr) (inst : Instance) : MetaM (Option (MetavarContext �
     -- unification: a would-be assignment (e.g. from defeq abuse picking an instance for the wrong
     -- type) triggers synthesis instead. Resolves #9077.
     let nonAssignable : MVarIdSet :=
-      if (← getRecordedOption tcUnifyInstanceImplicits) then {}
-      else .ofList (subgoals.map (·.mvarId!))
+      if unifyInstanceImplicits then {} else .ofList (subgoals.map (·.mvarId!))
     withSynthesizableNonAssignable nonAssignable do
     if (← isDefEq mvarTypeBody instTypeBody) then
       /-
@@ -662,7 +664,7 @@ def generate : SynthM Unit := do
       withTraceNode `Meta.synthInstance.apply
         (fun _ => return m!"apply {inst.val} to {← instantiateMVars (← inferType mvar)}") do
       modifyTop fun gNode => { gNode with currInstanceIdx := idx }
-      if let some (mctx, subgoals) ← tryResolve mvar inst then
+      if let some (mctx, subgoals) ← tryResolve mvar inst (← read).unifyInstanceImplicits then
         consume { key, mvar, subgoals, mctx, size := 0 }
         return some ()
       return none
@@ -724,7 +726,9 @@ def main (type : Expr) (maxResultSize : Nat) : MetaM (Option AbstractMVarsResult
        synth
      tryCatchRuntimeEx
        -- unrestricted: a limit, exceeding it throws
-       (action.run { maxResultSize, maxHeartbeats := getMaxHeartbeats (← getOptionsUnrestricted) } |>.run' {})
+       (action.run {
+          maxResultSize, maxHeartbeats := getMaxHeartbeats (← getOptionsUnrestricted)
+          unifyInstanceImplicits := (← getRecordedOption tcUnifyInstanceImplicits) } |>.run' {})
        fun ex =>
          if ex.isRuntime then
            throwError "failed to synthesize{indentExpr type}\n{ex.toMessageData}{useDiagnosticMsg}"

@@ -2110,8 +2110,8 @@ private partial def isDefEqQuickOther (t s : Expr) : MetaM LBool := do
         toLBoolM <| processAssignment' t s
       else if !tAssign? && sAssign? then
         toLBoolM <| processAssignment' s t
-      else if !tAssign? && !sAssign? &&
-          (← synthNonAssignableMVar? tFn <||> synthNonAssignableMVar? sFn) then
+      else if (← pure (!tAssign? && !sAssign?) <&&>
+          (synthNonAssignableMVar? tFn <||> synthNonAssignableMVar? sFn)) then
         -- A would-be assignment to an instance argument during type class resolution: the argument
         -- has been synthesized instead.
         toLBoolM <| Meta.isExprDefEqAux (← instantiateMVars t) (← instantiateMVars s)

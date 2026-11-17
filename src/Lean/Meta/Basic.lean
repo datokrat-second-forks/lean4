@@ -1219,12 +1219,12 @@ def _root_.Lean.MVarId.isReadOnlyOrSyntheticOpaque (mvarId : MVarId) : MetaM Boo
   let mvarDecl ← mvarId.getDecl
   if mvarDecl.depth != (← getMCtx).depth then
     return true
-  else if (← read).synthesizableNonAssignableMVars.contains mvarId then
-    return true
   else
     match mvarDecl.kind with
     | MetavarKind.syntheticOpaque => return !(← getConfig).assignSyntheticOpaque
-    | _ => return false
+    | _ =>
+      let set := (← read).synthesizableNonAssignableMVars
+      return !set.isEmpty && set.contains mvarId
 
 /--
 Return the level of the given universe level metavariable.
