@@ -87,6 +87,12 @@ register_builtin_option simp.packCongr.ctorOnly : Bool := {
       the pack constructor (possibly after unfolding reducible definitions)"
   }
 
+register_builtin_option debug.simp.packCongr.propLens : Bool := {
+    defValue := false
+    descr    := "(simp) MEASUREMENT: inside a pack value, also try `@[congr]` theorems for the pack \
+      constructor that have no pack hypothesis (a lens with a propositional hypothesis)"
+  }
+
 register_builtin_option debug.simp.congr.disabled : String := {
     defValue := ""
     descr    := "(simp) DEBUG: name of a `congr` theorem that `simp` does not use"
@@ -1585,8 +1591,9 @@ where
     unless all.isEmpty do
       let cs ← congrCandidates fName false all v
       let packs : NameSet := ((← get).packCongrIndex[(fName, false)]?.map (·.2)).getD {}
+      let propLens := debug.simp.packCongr.propLens.get (← getOptions)
       for c in cs do
-        unless packs.contains c.theoremName do continue
+        unless propLens || packs.contains c.theoremName do continue
         if let some r ← trySimpCongrTheorem? c v then
           if r.expr != v then return some r
     if let some r ← dsimpCongrInSimp? v all then

@@ -427,7 +427,14 @@ builtin_initialize
         Simp.recordPackCongrKeys c : MetaM Unit).run {} {}
   }
 
-def getDSimpCongrTheorems : CoreM SimpCongrTheorems :=
+/-- Measurement only: `simp` and `dsimp` use no `@[dsimp_congr]` theorem. -/
+register_builtin_option debug.simp.packCongr.disable : Bool := {
+  defValue := false
+  descr    := "(simp) DEBUG: do not use `@[dsimp_congr]` theorems"
+}
+
+def getDSimpCongrTheorems : CoreM SimpCongrTheorems := do
+  if debug.simp.packCongr.disable.get (← getOptions) then return {}
   return dsimpCongrExtension.getState (← getEnv)
 
 end Lean.Meta
