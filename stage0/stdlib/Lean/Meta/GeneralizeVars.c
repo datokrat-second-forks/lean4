@@ -2567,11 +2567,11 @@ goto v___jp_735_;
 v___jp_820_:
 {
 uint8_t v___x_824_; 
-v___x_824_ = l_Lean_Expr_hasFVar(v___y_821_);
+v___x_824_ = l_Lean_Expr_hasFVar(v___y_822_);
 if (v___x_824_ == 0)
 {
 uint8_t v___x_825_; 
-v___x_825_ = l_Lean_Expr_hasMVar(v___y_821_);
+v___x_825_ = l_Lean_Expr_hasMVar(v___y_822_);
 if (v___x_825_ == 0)
 {
 lean_dec_ref(v___y_822_);
@@ -2584,7 +2584,7 @@ goto v___jp_769_;
 else
 {
 lean_object* v___x_826_; 
-v___x_826_ = l___private_Lean_MetavarContext_0__Lean_DependsOn_dep_visit(v___f_819_, v___y_822_, v___y_821_, v_snd_823_);
+v___x_826_ = l___private_Lean_MetavarContext_0__Lean_DependsOn_dep_visit(v___f_819_, v___y_821_, v___y_822_, v_snd_823_);
 v___y_788_ = v___x_826_;
 goto v___jp_787_;
 }
@@ -2592,7 +2592,7 @@ goto v___jp_787_;
 else
 {
 lean_object* v___x_827_; 
-v___x_827_ = l___private_Lean_MetavarContext_0__Lean_DependsOn_dep_visit(v___f_819_, v___y_822_, v___y_821_, v_snd_823_);
+v___x_827_ = l___private_Lean_MetavarContext_0__Lean_DependsOn_dep_visit(v___f_819_, v___y_821_, v___y_822_, v_snd_823_);
 v___y_788_ = v___x_827_;
 goto v___jp_787_;
 }
@@ -2707,8 +2707,8 @@ v___x_858_ = l_Lean_Expr_hasMVar(v_type_851_);
 if (v___x_858_ == 0)
 {
 lean_inc_ref(v_value_852_);
-v___y_821_ = v_value_852_;
-v___y_822_ = v___f_840_;
+v___y_821_ = v___f_840_;
+v___y_822_ = v_value_852_;
 v_snd_823_ = v___x_856_;
 goto v___jp_820_;
 }
@@ -2720,8 +2720,8 @@ lean_inc_ref(v___f_840_);
 lean_inc_ref(v___f_819_);
 v___x_859_ = l___private_Lean_MetavarContext_0__Lean_DependsOn_dep_visit(v___f_819_, v___f_840_, v_type_851_, v___x_856_);
 lean_inc_ref(v_value_852_);
-v___y_829_ = v_value_852_;
-v___y_830_ = v___f_840_;
+v___y_829_ = v___f_840_;
+v___y_830_ = v_value_852_;
 v___y_831_ = v___x_859_;
 goto v___jp_828_;
 }
@@ -2734,8 +2734,8 @@ lean_inc_ref(v___f_840_);
 lean_inc_ref(v___f_819_);
 v___x_860_ = l___private_Lean_MetavarContext_0__Lean_DependsOn_dep_visit(v___f_819_, v___f_840_, v_type_851_, v___x_856_);
 lean_inc_ref(v_value_852_);
-v___y_829_ = v_value_852_;
-v___y_830_ = v___f_840_;
+v___y_829_ = v___f_840_;
+v___y_830_ = v_value_852_;
 v___y_831_ = v___x_860_;
 goto v___jp_828_;
 }

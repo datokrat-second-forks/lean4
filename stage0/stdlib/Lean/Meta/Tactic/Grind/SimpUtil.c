@@ -3019,7 +3019,7 @@ goto v___jp_950_;
 }
 else
 {
-lean_object* v___x_960_; lean_object* v___x_961_; uint8_t v___x_962_; lean_object* v___y_964_; lean_object* v___y_965_; lean_object* v___y_966_; uint8_t v___y_967_; lean_object* v___y_968_; lean_object* v___y_969_; lean_object* v___y_970_; lean_object* v___y_971_; 
+lean_object* v___x_960_; lean_object* v___x_961_; uint8_t v___x_962_; lean_object* v___y_964_; uint8_t v___y_965_; lean_object* v___y_966_; lean_object* v___y_967_; lean_object* v___y_968_; lean_object* v___y_969_; lean_object* v___y_970_; lean_object* v___y_971_; 
 v___x_960_ = l_Lean_Expr_appFnCleanup___redArg(v___x_958_);
 v___x_961_ = ((lean_object*)(l_Lean_Meta_Grind_pushNot___redArg___closed__1));
 v___x_962_ = l_Lean_Expr_isConstOf(v___x_960_, v___x_961_);
@@ -4077,14 +4077,14 @@ lean_dec(v_a_1014_);
 if (v___x_1019_ == 0)
 {
 lean_del_object(v___x_1016_);
-v___y_964_ = v_binderType_1010_;
-v___y_965_ = v___y_1007_;
-v___y_966_ = v___y_1006_;
-v___y_967_ = v_binderInfo_1012_;
-v___y_968_ = v_binderName_1009_;
-v___y_969_ = v___y_1008_;
-v___y_970_ = v___y_1005_;
-v___y_971_ = v_body_1011_;
+v___y_964_ = v___y_1005_;
+v___y_965_ = v_binderInfo_1012_;
+v___y_966_ = v_binderName_1009_;
+v___y_967_ = v___y_1007_;
+v___y_968_ = v___y_1006_;
+v___y_969_ = v_body_1011_;
+v___y_970_ = v_binderType_1010_;
+v___y_971_ = v___y_1008_;
 goto v___jp_963_;
 }
 else
@@ -4129,14 +4129,14 @@ else
 {
 lean_del_object(v___x_1016_);
 lean_dec(v_a_1014_);
-v___y_964_ = v_binderType_1010_;
-v___y_965_ = v___y_1007_;
-v___y_966_ = v___y_1006_;
-v___y_967_ = v_binderInfo_1012_;
-v___y_968_ = v_binderName_1009_;
-v___y_969_ = v___y_1008_;
-v___y_970_ = v___y_1005_;
-v___y_971_ = v_body_1011_;
+v___y_964_ = v___y_1005_;
+v___y_965_ = v_binderInfo_1012_;
+v___y_966_ = v_binderName_1009_;
+v___y_967_ = v___y_1007_;
+v___y_968_ = v___y_1006_;
+v___y_969_ = v_body_1011_;
+v___y_970_ = v_binderType_1010_;
+v___y_971_ = v___y_1008_;
 goto v___jp_963_;
 }
 }
@@ -4215,13 +4215,13 @@ return v___x_1041_;
 v___jp_963_:
 {
 lean_object* v___x_972_; lean_object* v___x_973_; lean_object* v___x_974_; lean_object* v___x_975_; 
-lean_inc_ref(v___y_971_);
-lean_inc_ref_n(v___y_964_, 3);
-lean_inc(v___y_968_);
-v___x_972_ = l_Lean_mkLambda(v___y_968_, v___y_967_, v___y_964_, v___y_971_);
-v___x_973_ = l_Lean_mkNot(v___y_971_);
-v___x_974_ = l_Lean_mkLambda(v___y_968_, v___y_967_, v___y_964_, v___x_973_);
-v___x_975_ = l_Lean_Meta_getLevel(v___y_964_, v___y_970_, v___y_966_, v___y_965_, v___y_969_);
+lean_inc_ref(v___y_969_);
+lean_inc_ref_n(v___y_970_, 3);
+lean_inc(v___y_966_);
+v___x_972_ = l_Lean_mkLambda(v___y_966_, v___y_965_, v___y_970_, v___y_969_);
+v___x_973_ = l_Lean_mkNot(v___y_969_);
+v___x_974_ = l_Lean_mkLambda(v___y_966_, v___y_965_, v___y_970_, v___x_973_);
+v___x_975_ = l_Lean_Meta_getLevel(v___y_970_, v___y_964_, v___y_968_, v___y_967_, v___y_971_);
 if (lean_obj_tag(v___x_975_) == 0)
 {
 lean_object* v_a_976_; lean_object* v___x_978_; uint8_t v_isShared_979_; uint8_t v_isSharedCheck_994_; 
@@ -4251,11 +4251,11 @@ lean_ctor_set(v___x_982_, 0, v_a_976_);
 lean_ctor_set(v___x_982_, 1, v___x_981_);
 lean_inc_ref(v___x_982_);
 v___x_983_ = l_Lean_mkConst(v___x_980_, v___x_982_);
-lean_inc_ref(v___y_964_);
-v___x_984_ = l_Lean_mkAppB(v___x_983_, v___y_964_, v___x_974_);
+lean_inc_ref(v___y_970_);
+v___x_984_ = l_Lean_mkAppB(v___x_983_, v___y_970_, v___x_974_);
 v___x_985_ = ((lean_object*)(l_Lean_Meta_Grind_pushNot___redArg___closed__5));
 v___x_986_ = l_Lean_mkConst(v___x_985_, v___x_982_);
-v___x_987_ = l_Lean_mkAppB(v___x_986_, v___y_964_, v___x_972_);
+v___x_987_ = l_Lean_mkAppB(v___x_986_, v___y_970_, v___x_972_);
 v___x_988_ = lean_alloc_ctor(1, 1, 0);
 lean_ctor_set(v___x_988_, 0, v___x_987_);
 v___x_989_ = lean_alloc_ctor(0, 2, 1);
@@ -4289,7 +4289,7 @@ else
 lean_object* v_a_995_; lean_object* v___x_997_; uint8_t v_isShared_998_; uint8_t v_isSharedCheck_1002_; 
 lean_dec_ref(v___x_974_);
 lean_dec_ref(v___x_972_);
-lean_dec_ref(v___y_964_);
+lean_dec_ref(v___y_970_);
 v_a_995_ = lean_ctor_get(v___x_975_, 0);
 v_isSharedCheck_1002_ = !lean_is_exclusive(v___x_975_);
 if (v_isSharedCheck_1002_ == 0)

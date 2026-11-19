@@ -3539,7 +3539,7 @@ lean_dec(v_a_892_);
 v___x_895_ = lean_alloc_ctor(1, 1, 0);
 lean_ctor_set(v___x_895_, 0, v_declName_834_);
 v___x_896_ = lean_box(1);
-v___x_897_ = l_Lean_Meta_Grind_addNewRawFact___redArg(v___y_883_, v___y_884_, v___x_894_, v___x_895_, v___x_896_, v___y_885_, v___y_886_, v___y_887_, v___y_888_, v___y_889_, v___y_890_);
+v___x_897_ = l_Lean_Meta_Grind_addNewRawFact___redArg(v___y_884_, v___y_883_, v___x_894_, v___x_895_, v___x_896_, v___y_885_, v___y_886_, v___y_887_, v___y_888_, v___y_889_, v___y_890_);
 return v___x_897_;
 }
 else
@@ -3628,8 +3628,8 @@ v_options_920_ = lean_ctor_get(v_toCold_919_, 2);
 v_hasTrace_921_ = lean_ctor_get_uint8(v_options_920_, sizeof(void*)*1);
 if (v_hasTrace_921_ == 0)
 {
-v___y_883_ = v_a_914_;
-v___y_884_ = v_a_916_;
+v___y_883_ = v_a_916_;
+v___y_884_ = v_a_914_;
 v___y_885_ = v___y_787_;
 v___y_886_ = v___y_789_;
 v___y_887_ = v___y_793_;
@@ -3647,8 +3647,8 @@ v___x_924_ = lean_obj_once(&l_Lean_Meta_Grind_instantiateExtTheorem___lam__1___c
 v___x_925_ = l___private_Lean_Util_Trace_0__Lean_checkTraceOption_go(v_inheritedTraceOptions_922_, v_options_920_, v___x_924_);
 if (v___x_925_ == 0)
 {
-v___y_883_ = v_a_914_;
-v___y_884_ = v_a_916_;
+v___y_883_ = v_a_916_;
+v___y_884_ = v_a_914_;
 v___y_885_ = v___y_787_;
 v___y_886_ = v___y_789_;
 v___y_887_ = v___y_793_;
@@ -3675,8 +3675,8 @@ v___x_931_ = l_Lean_addTrace___at___00Lean_Meta_Grind_instantiateExtTheorem_spec
 if (lean_obj_tag(v___x_931_) == 0)
 {
 lean_dec_ref_known(v___x_931_, 1);
-v___y_883_ = v_a_914_;
-v___y_884_ = v_a_916_;
+v___y_883_ = v_a_916_;
+v___y_884_ = v_a_914_;
 v___y_885_ = v___y_787_;
 v___y_886_ = v___y_789_;
 v___y_887_ = v___y_793_;

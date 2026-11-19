@@ -11402,8 +11402,8 @@ goto v___jp_4546_;
 }
 else
 {
-lean_dec_ref_known(v___x_4544_, 2);
 lean_dec(v_tail_4545_);
+lean_dec_ref_known(v___x_4544_, 2);
 lean_del_object(v___x_4541_);
 lean_dec(v_levelParams_4539_);
 lean_dec(v___x_4536_);
@@ -11954,8 +11954,8 @@ else
 {
 lean_object* v_a_4687_; lean_object* v___x_4689_; uint8_t v_isShared_4690_; uint8_t v_isSharedCheck_4694_; 
 lean_dec_ref(v___x_4551_);
-lean_dec_ref_known(v___x_4544_, 2);
 lean_dec(v_tail_4545_);
+lean_dec_ref_known(v___x_4544_, 2);
 lean_del_object(v___x_4541_);
 lean_dec(v_levelParams_4539_);
 lean_dec(v___x_4536_);
@@ -18452,8 +18452,8 @@ goto v___jp_7105_;
 v___jp_7047_:
 {
 lean_object* v___x_7051_; 
-lean_inc(v___y_7049_);
-v___x_7051_ = l___private_Lean_Util_Trace_0__Lean_addTraceNode___at___00__private_Lean_Util_Trace_0__Lean_withTraceNode_postCallback___at___00Lean_mkNoConfusion_spec__2_spec__3(v_oldTraces_7037_, v_data_7050_, v___y_7049_, v___y_7048_, v___y_7040_, v___y_7041_, v___y_7042_, v___y_7043_);
+lean_inc(v___y_7048_);
+v___x_7051_ = l___private_Lean_Util_Trace_0__Lean_addTraceNode___at___00__private_Lean_Util_Trace_0__Lean_withTraceNode_postCallback___at___00Lean_mkNoConfusion_spec__2_spec__3(v_oldTraces_7037_, v_data_7050_, v___y_7048_, v___y_7049_, v___y_7040_, v___y_7041_, v___y_7042_, v___y_7043_);
 if (lean_obj_tag(v___x_7051_) == 0)
 {
 lean_object* v___x_7052_; 
@@ -18492,8 +18492,8 @@ lean_dec(v_snd_7054_);
 lean_dec(v_fst_7053_);
 lean_dec_ref(v_tag_7034_);
 lean_dec(v_cls_7032_);
-v___y_7048_ = v_a_7059_;
-v___y_7049_ = v___y_7058_;
+v___y_7048_ = v___y_7058_;
+v___y_7049_ = v_a_7059_;
 v_data_7050_ = v_data_7064_;
 goto v___jp_7047_;
 }
@@ -18512,8 +18512,8 @@ v___x_7067_ = lean_unbox_float(v_snd_7054_);
 lean_dec(v_snd_7054_);
 lean_ctor_set_float(v_data_7065_, sizeof(void*)*3 + 8, v___x_7067_);
 lean_ctor_set_uint8(v_data_7065_, sizeof(void*)*3 + 16, v_collapsed_7033_);
-v___y_7048_ = v_a_7059_;
-v___y_7049_ = v___y_7058_;
+v___y_7048_ = v___y_7058_;
+v___y_7049_ = v_a_7059_;
 v_data_7050_ = v_data_7065_;
 goto v___jp_7047_;
 }

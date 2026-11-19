@@ -10415,8 +10415,8 @@ else
 {
 lean_object* v___x_2742_; lean_object* v___x_2744_; 
 lean_dec(v_a_2454_);
-lean_dec(v_val_2452_);
 lean_dec_ref_known(v_a_2448_, 1);
+lean_dec(v_val_2452_);
 lean_dec_ref_known(v___x_2444_, 2);
 lean_del_object(v___x_2440_);
 lean_dec(v_val_2438_);

@@ -1551,8 +1551,8 @@ return v___x_385_;
 else
 {
 lean_del_object(v___x_278_);
-lean_dec_ref_known(v_a_274_, 1);
 lean_dec(v_a_276_);
+lean_dec_ref_known(v_a_274_, 1);
 lean_dec(v___y_251_);
 lean_dec_ref(v___y_250_);
 lean_dec(v___y_249_);

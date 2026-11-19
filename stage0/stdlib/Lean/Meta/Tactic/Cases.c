@@ -8514,11 +8514,11 @@ lean_inc(v_ctors_2871_);
 lean_dec_ref(v_inductiveVal_2870_);
 v___x_2872_ = lean_array_mk(v_ctors_2871_);
 lean_inc(v_majorFVarId_2849_);
-v___x_2873_ = l_Lean_MVarId_induction(v_mvarId_2848_, v_majorFVarId_2849_, v___y_2869_, v_givenNames_2850_, v___y_2867_, v___y_2866_, v___y_2868_, v___y_2865_);
-lean_dec(v___y_2865_);
-lean_dec_ref(v___y_2868_);
-lean_dec(v___y_2866_);
+v___x_2873_ = l_Lean_MVarId_induction(v_mvarId_2848_, v_majorFVarId_2849_, v___y_2869_, v_givenNames_2850_, v___y_2865_, v___y_2866_, v___y_2867_, v___y_2868_);
+lean_dec(v___y_2868_);
 lean_dec_ref(v___y_2867_);
+lean_dec(v___y_2866_);
+lean_dec_ref(v___y_2865_);
 if (lean_obj_tag(v___x_2873_) == 0)
 {
 lean_object* v_a_2874_; lean_object* v___x_2876_; uint8_t v_isShared_2877_; uint8_t v_isSharedCheck_2882_; 
@@ -8632,10 +8632,10 @@ v___x_2905_ = lean_st_ref_get(v___y_2904_);
 if (v_useNatCasesAuxOn_2851_ == 0)
 {
 lean_dec(v___x_2905_);
-v___y_2892_ = v___y_2904_;
+v___y_2892_ = v___y_2901_;
 v___y_2893_ = v___y_2902_;
-v___y_2894_ = v___y_2901_;
-v___y_2895_ = v___y_2903_;
+v___y_2894_ = v___y_2903_;
+v___y_2895_ = v___y_2904_;
 goto v___jp_2891_;
 }
 else
@@ -8652,10 +8652,10 @@ v___x_2911_ = lean_name_eq(v_name_2909_, v___x_2910_);
 if (v___x_2911_ == 0)
 {
 lean_dec_ref(v_env_2908_);
-v___y_2892_ = v___y_2904_;
+v___y_2892_ = v___y_2901_;
 v___y_2893_ = v___y_2902_;
-v___y_2894_ = v___y_2901_;
-v___y_2895_ = v___y_2903_;
+v___y_2894_ = v___y_2903_;
+v___y_2895_ = v___y_2904_;
 goto v___jp_2891_;
 }
 else
@@ -8665,18 +8665,18 @@ v___x_2912_ = ((lean_object*)(l___private_Lean_Meta_Tactic_Cases_0__Lean_Meta_Ca
 v___x_2913_ = l_Lean_Environment_contains(v_env_2908_, v___x_2912_, v___x_2911_);
 if (v___x_2913_ == 0)
 {
-v___y_2892_ = v___y_2904_;
+v___y_2892_ = v___y_2901_;
 v___y_2893_ = v___y_2902_;
-v___y_2894_ = v___y_2901_;
-v___y_2895_ = v___y_2903_;
+v___y_2894_ = v___y_2903_;
+v___y_2895_ = v___y_2904_;
 goto v___jp_2891_;
 }
 else
 {
-v___y_2865_ = v___y_2904_;
+v___y_2865_ = v___y_2901_;
 v___y_2866_ = v___y_2902_;
-v___y_2867_ = v___y_2901_;
-v___y_2868_ = v___y_2903_;
+v___y_2867_ = v___y_2903_;
+v___y_2868_ = v___y_2904_;
 v___y_2869_ = v___x_2912_;
 goto v___jp_2864_;
 }
