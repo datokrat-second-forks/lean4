@@ -6618,8 +6618,8 @@ return v___x_2084_;
 }
 else
 {
-lean_dec(v_head_2039_);
 lean_dec_ref_known(v_symbols_2038_, 2);
+lean_dec(v_head_2039_);
 lean_dec_ref(v_thm_2034_);
 lean_dec_ref(v_s_2033_);
 goto v___jp_2035_;
@@ -7809,7 +7809,7 @@ _start:
 lean_object* v___x_2518_; lean_object* v___x_2519_; lean_object* v___x_2520_; 
 v___x_2518_ = lean_obj_once(&l_Lean_addMessageContextPartial___at___00Lean_throwError___at___00Lean_Meta_Grind_throwNotMarkedWithGrindAttribute_spec__0_spec__0___closed__0, &l_Lean_addMessageContextPartial___at___00Lean_throwError___at___00Lean_Meta_Grind_throwNotMarkedWithGrindAttribute_spec__0_spec__0___closed__0_once, _init_l_Lean_addMessageContextPartial___at___00Lean_throwError___at___00Lean_Meta_Grind_throwNotMarkedWithGrindAttribute_spec__0_spec__0___closed__0);
 v___x_2519_ = lean_unsigned_to_nat(0u);
-v___x_2520_ = lean_alloc_ctor(0, 11, 0);
+v___x_2520_ = lean_alloc_ctor(0, 10, 0);
 lean_ctor_set(v___x_2520_, 0, v___x_2519_);
 lean_ctor_set(v___x_2520_, 1, v___x_2519_);
 lean_ctor_set(v___x_2520_, 2, v___x_2519_);
@@ -7820,7 +7820,6 @@ lean_ctor_set(v___x_2520_, 6, v___x_2518_);
 lean_ctor_set(v___x_2520_, 7, v___x_2518_);
 lean_ctor_set(v___x_2520_, 8, v___x_2518_);
 lean_ctor_set(v___x_2520_, 9, v___x_2518_);
-lean_ctor_set(v___x_2520_, 10, v___x_2518_);
 return v___x_2520_;
 }
 }

@@ -2900,7 +2900,7 @@ _start:
 lean_object* v___x_644_; lean_object* v___x_645_; lean_object* v___x_646_; 
 v___x_644_ = lean_obj_once(&l_Lean_mkUnknownIdentifierMessageCore___at___00Lean_mkUnknownIdentifierMessage___at___00Lean_throwUnknownIdentifierAt___at___00Lean_throwUnknownConstantAt___at___00Lean_throwUnknownConstant___at___00Lean_Elab_Tactic_VCGen_mkContext_spec__4_spec__6_spec__11_spec__15_spec__16___redArg___closed__0, &l_Lean_mkUnknownIdentifierMessageCore___at___00Lean_mkUnknownIdentifierMessage___at___00Lean_throwUnknownIdentifierAt___at___00Lean_throwUnknownConstantAt___at___00Lean_throwUnknownConstant___at___00Lean_Elab_Tactic_VCGen_mkContext_spec__4_spec__6_spec__11_spec__15_spec__16___redArg___closed__0_once, _init_l_Lean_mkUnknownIdentifierMessageCore___at___00Lean_mkUnknownIdentifierMessage___at___00Lean_throwUnknownIdentifierAt___at___00Lean_throwUnknownConstantAt___at___00Lean_throwUnknownConstant___at___00Lean_Elab_Tactic_VCGen_mkContext_spec__4_spec__6_spec__11_spec__15_spec__16___redArg___closed__0);
 v___x_645_ = lean_unsigned_to_nat(0u);
-v___x_646_ = lean_alloc_ctor(0, 11, 0);
+v___x_646_ = lean_alloc_ctor(0, 10, 0);
 lean_ctor_set(v___x_646_, 0, v___x_645_);
 lean_ctor_set(v___x_646_, 1, v___x_645_);
 lean_ctor_set(v___x_646_, 2, v___x_645_);
@@ -2911,7 +2911,6 @@ lean_ctor_set(v___x_646_, 6, v___x_644_);
 lean_ctor_set(v___x_646_, 7, v___x_644_);
 lean_ctor_set(v___x_646_, 8, v___x_644_);
 lean_ctor_set(v___x_646_, 9, v___x_644_);
-lean_ctor_set(v___x_646_, 10, v___x_644_);
 return v___x_646_;
 }
 }
