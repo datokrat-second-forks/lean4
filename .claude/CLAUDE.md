@@ -1,5 +1,9 @@
 (In the following, use `sysctl -n hw.logicalcpu` instead of `nproc` on macOS)
 
+## Current task: pack congruences for all of Mathlib
+
+When working on the strict instance checks or the pack congruences (`~/lean4`, `~/lean4-congr-view`, `~/downstream-lean4`), first read [`~/pack-regime/TASK.md`](/home/paul/pack-regime/TASK.md), also after every context compaction. Keep the list of loose ends and the step branches as [`~/pack-regime/TRACKING.md`](/home/paul/pack-regime/TRACKING.md) says.
+
 ## Building
 
 To build Lean you should use `make -j$(nproc) -C build/release`.
