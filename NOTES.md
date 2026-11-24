@@ -108,3 +108,13 @@ Scratch files referenced below live in
   independent universes per type and changeable index types.
 - Iterators: all prototype goals from `~/lean4-bundled-iter` pass with `toList_congr`, `toArray_congr`,
   `map_pack_congr` (`$S/iterpack/`).
+
+## `Monoidal/Internal/FunctorCategory` (`inverseObj`, Mon/Comon)
+
+- The dsimp opt-outs (three of them) all come from `inverseObj`. Simp rewrites `(inverseObj F).X` to `F ⋙ Mon.forget D` (`inverseObj_X`), and the check reverts because `(inverseObj F).mon : MonObj (inverseObj F).X` doesn't have type `MonObj (F ⋙ Mon.forget D)` at `.instances`, and nothing can synthesize the latter.
+- The `simps` lemma `inverseObj_mon_one_app` is itself mixed: object `F ⋙ Mon.forget D`, instance `(inverseObj F).mon`. Cause: `Simps.addProjections` recurses with `newType ← inferType newRhs` and takes the projection's parameters from the type of the field value, not of the LHS.
+- Fix 3 (`attribute [local instance_reducible] inverseObj`, Mon and Comon): file passes without opt-outs, base toolchain and congr-view. `$S/packsites/FC_fix3l.lean`.
+- Fix 1 (bundled lemmas, emulated by hand): passes without opt-outs only if additionally `inverseObj_X` is not simp (pointwise `X_obj`/`X_map` lemmas instead): `$S/packsites/FC_fix1b.lean`. With `inverseObj_X` simp, `≫`'s implicit objects get respelled while `η`'s instance can't follow (`FC_fix1.lean`). `@[simps X_obj X_map mon_one_app mon_mul_app]` generates good `X_obj`/`X_map` lemmas today, but the `mon_*` lemmas stay mixed (`FC_fix1s.lean`), so this needs the `simps` change.
+- No other Mathlib file imports this one.
+- Correction: with bundled lemmas but `inverseObj_X` still simp, `NatTrans.comp_app` fails at `implicit` (not `.instances`): `X ⋙ Mon.forget D =?= (inverseObj X).X` gets stuck on the semireducible `inverseObj`; the goal after the partial revert isn't type-correct at `implicit` (`FC_fix1u.lean`). `inverseObj_X` only holds at default, like the `@[simps]` lemmas in B9.
+- `attribute [local implicit_reducible] inverseObj` (Mon and Comon) alone, with the original `simps` lemmas and no opt-outs: file passes (`FC_ir.lean`). Also passes combined with the bundled lemmas and simp `inverseObj_X` (`FC_fix1ir.lean`).
